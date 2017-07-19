@@ -1,16 +1,38 @@
 const express = require('express');
-const router = express.Router();
+const path = require('path');
 const OAuthServer = require('express-oauth-server');
 
 const OAuthModel = require('./OAuthModel');
+const MyQ = require('./liftmaster');
+
+const router = express.Router();
 
 const oauth = new OAuthServer({ 
   model: OAuthModel
 });
 
-router.get('/login', (req, res) => {
-  const { username, password } = req.body;
-  console.log(username, password);
+router.use(express.static(path.join(__dirname, 'public')));
+
+router.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const garageDoor = new MyQ(email, password);
+  garageDoor.login()
+    .then((response) => {
+      if (response.SecurityToken) {
+        res.json({
+          success: true,
+          token: res.SecurityToken,
+          message: "Success!"
+        });
+      } else {
+        res.json({
+          success: false,
+          message: response.ErrorMessage
+        });
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
 });
 
 router.use(oauth.token());

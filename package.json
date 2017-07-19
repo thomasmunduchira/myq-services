@@ -23,6 +23,8 @@
     "express-oauth-server": "^2.0.0-b1",
     "logger": "^0.0.1",
     "mongoose": "^4.11.3",
-    "morgan": "^1.8.2"
+    "morgan": "^1.8.2",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4"
   }
 }
