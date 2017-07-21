@@ -1,9 +1,9 @@
 const express = require('express');
 const path = require('path');
 const OAuthServer = require('express-oauth-server');
+const MyQ = require('liftmaster-api');
 
 const OAuthModel = require('./OAuthModel');
-const MyQ = require('./liftmaster');
 
 const router = express.Router();
 
@@ -17,17 +17,15 @@ router.post('/login', (req, res) => {
   const { email, password } = req.body;
   const garageDoor = new MyQ(email, password);
   garageDoor.login()
-    .then((response) => {
-      if (response.SecurityToken) {
+    .then((result) => {
+      if (result.returnCode === 0) {
         res.json({
-          success: true,
-          token: res.SecurityToken,
-          message: "Success!"
+          success: true
         });
       } else {
         res.json({
           success: false,
-          message: response.ErrorMessage
+          message: result.error
         });
       }
     }).catch((err) => {
