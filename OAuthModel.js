@@ -8,9 +8,9 @@ module.exports.getAccessToken = function(accessToken) {
   }).lean();
 };
 
-module.exports.getUser = function(username, password) {
+module.exports.getUser = function(email, password) {
   return usersModel.findOne({
-    username,
+    email,
     password
   }).lean();
 };

@@ -3,10 +3,6 @@ const Schema = mongoose.Schema;
 
 const model = mongoose.model('Users', new Schema({
   email: {
-    type: String,
-    default: ''
-  },
-  username: {
     type: String
   },
   password: {
