@@ -4,12 +4,6 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-const greenlockExpress = require('greenlock-express');
-const leChallengeFs = require('le-challenge-fs');
-const leStoreCertbot = require('le-store-certbot');
-const http = require('http');
-const https = require('https');
-const redirectHttps = require('redirect-https');
 
 const config = require('./config');
 const routes = require('./routes');
@@ -48,44 +42,6 @@ app.use(session(sess));
 
 app.use('/', routes);
 
-const approveDomains = (opts, certs, cb) => {
-  if (certs) {
-    opts.domains = certs.altnames;
-  } else {
-    opts.email = config.email;
-    opts.agreeTos = true;
-  }
-  cb(null, {
-    options: opts,
-    certs: certs
-  });
-}
- 
-const lex = greenlockExpress.create({
-  server: 'staging',
-  challenges: {
-    'http-01': leChallengeFs.create({
-      webrootPath: '/tmp/acme-challenges'
-    })
-  },
-  store: leStoreCertbot.create({
-    webrootPath: '/tmp/acme-challenges'
-  }), 
-  approveDomains: approveDomains
+app.listen(3000, () => {
+  console.log('LiftMaster API listening on port 3000!');
 });
-
-if (env === 'production') {
-  http.createServer(lex.middleware(redirectHttps)())
-    .listen(80, () => {
-      console.log('LiftMaster API listening on', this.address());
-    });
- 
-  https.createServer(lex.httpsOptions, lex.middleware(app))
-    .listen(443, () => {
-      console.log('LiftMaster API listening on', this.address());
-    });
-} else {
-  app.listen(3000, () => {
-    console.log('LiftMaster API listening on port 3000!');
-  });
-}
