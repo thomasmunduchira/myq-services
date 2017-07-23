@@ -4,7 +4,8 @@ const config = {
   },
   session: {
     secret: SESSION_SECRET
-  }
+  },
+  email: EMAIL
 };
 
 module.exports = config;
