@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const OAuthServer = require('express-oauth-server');
-const MyQ = require('./liftmaster-api/liftmaster');
+const MyQ = require('liftmaster-api');
 
 const config = require('./config');
 const model = require('./model');
