@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const model = mongoose.model('Clients', new Schema({
-  clientId: {
+const model = mongoose.model('User', new Schema({
+  username: {
     type: String
   },
-  clientSecret: {
+  password: {
     type: String
   },
-  redirectUris: {
-    type: Array
+  securityToken: {
+    type: String
   }
 }));
 
