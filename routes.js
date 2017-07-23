@@ -91,7 +91,7 @@ const authenticateHandler = {
 router.post('/oauth/authorize', oauth.authorize({
   authenticateHandler
 }));
-router.use(oauth.token());
-router.use(oauth.authenticate());
+router.post(oauth.token());
+router.post(oauth.authenticate());
 
 module.exports = router;
