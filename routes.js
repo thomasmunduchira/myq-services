@@ -19,13 +19,21 @@ const oauth = new OAuthServer({
 router.use(express.static(path.join(__dirname, 'public')));
 
 router.get('/login', (req, res) => {
-  const { response_type, client_id, redirect_uri, scope, state } = req.query;
+  console.log('weee');
+  model.getAuthorizationCode("48a9a2c3dad3fd143f3d5325ec09e7bb56527864")
+    .then((result) => {
+      console.log('result', result);
+      console.log('hehehe');
+      const { response_type, client_id, redirect_uri, scope, state } = req.query;
   req.session.response_type = response_type;  
   req.session.client_id = client_id;
   req.session.redirect_uri = redirect_uri;
   req.session.scope = scope;
   req.session.state = state;
   res.redirect('/');
+    }).catch((err) => {
+      console.log('err', err);
+    });
 });
 
 router.post('/login', (req, res, next) => {
@@ -84,6 +92,7 @@ router.post('/login', (req, res, next) => {
 
 const authenticateHandler = {
   handle: (request, response) => {
+    console.log(request.session.user);
     return request.session.user;
   }
 };
@@ -91,7 +100,7 @@ const authenticateHandler = {
 router.post('/oauth/authorize', oauth.authorize({
   authenticateHandler
 }));
-router.use('/oauth/token', oauth.token());
-router.use('/oauth/token', oauth.authenticate());
+router.post('/oauth/token', oauth.token());
+router.post('/oauth/token', oauth.authenticate());
 
 module.exports = router;

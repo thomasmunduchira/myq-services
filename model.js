@@ -65,9 +65,18 @@ module.exports.saveToken = (token, client, user) => {
   });
   return newToken.save()
     .then((saveResult) => {
+      console.log(saveResult);
       var data = {};
       for (let prop in token) {
         data[prop] = token[prop];
+      }
+      data.client = {};
+      for (let prop in client) {
+        data.client[prop] = client[prop];
+      }
+      data.user = {};
+      for (let prop in user) {
+        data.user[prop] = user[prop];
       }
       return data;
     }).catch((err) => {
@@ -88,6 +97,14 @@ module.exports.saveAuthorizationCode = (code, client, user) => {
       var data = {};
       for (let prop in code) {
         data[prop] = code[prop];
+      }
+      data.client = {};
+      for (let prop in client) {
+        data.client[prop] = client[prop];
+      }
+      data.user = {};
+      for (let prop in user) {
+        data.user[prop] = user[prop];
       }
       return data;
     }).catch((err) => {
