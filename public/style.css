@@ -2,42 +2,77 @@ body {
   background: #263238;
   text-align: center;
   font-family: 'Helvetica', 'Arial', sans-serif;
+  font-size: 1.2em;
 }
 
 div {
   padding-bottom: 10px;
 }
 
-button {
-  background: #FAFAFA;
+input {
   border: none;
-  outline: none;
-  width: 70px;
+  width: 70vw;
   height: 30px;
 }
 
-input {
-  border: none;
+input[type="text"] {
+  font-size: 1.1em;
 }
 
 input:focus {
   outline: none;
 }
 
-button:hover {
+#submit {
+  background: #FAFAFA;
+  border: none;
+  outline: none;
+  width: 100px;
+  height: 40px;
+  font-size: 1em;
+}
+
+#submit:hover {
   background: #E0E0E0;
+  cursor: pointer;
 }
 
 #login-form {
   background: #ECEFF1;
   color: #212121;
-  width: 75vw;
-  max-width: 500px;
-  height: 50vh;
-  margin: 20vh auto 0 auto;
+  width: 84vw;
+  height: 84vh;
+  margin: 8vh auto 0 auto;
   border-radius: 25px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+@media only screen and (min-width: 768px) {
+  body {
+    font-size: 1.0em;
+  }
+
+  input {
+    width: 20vw;
+  }
+
+  input[type="text"] {
+    font-size: 0.9em;
+  }
+
+  #submit {
+    width: 70px;
+    height: 30px;
+  }
+
+  #login-form {
+    min-width: 70vw;
+    max-width: 400px;
+    min-height: 50vh;
+    max-height: 400px;
+    margin: 20vh auto 0 auto;
+  }
 }

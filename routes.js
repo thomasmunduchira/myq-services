@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const OAuthServer = require('express-oauth-server');
-const MyQ = require('liftmaster-api');
+const MyQ = require('./node-liftmaster/liftmaster');
 
 const config = require('./config');
 const model = require('./model');
@@ -25,12 +25,12 @@ router.get('/login', (req, res) => {
       console.log('result', result);
       console.log('hehehe');
       const { response_type, client_id, redirect_uri, scope, state } = req.query;
-  req.session.response_type = response_type;  
-  req.session.client_id = client_id;
-  req.session.redirect_uri = redirect_uri;
-  req.session.scope = scope;
-  req.session.state = state;
-  res.redirect('/');
+      req.session.response_type = response_type;  
+      req.session.client_id = client_id;
+      req.session.redirect_uri = redirect_uri;
+      req.session.scope = scope;
+      req.session.state = state;
+      res.redirect('/');
     }).catch((err) => {
       console.log('err', err);
     });

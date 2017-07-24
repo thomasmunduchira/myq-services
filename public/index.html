@@ -2,27 +2,36 @@
 <html>
 <head>
   <title>Garage Opener</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div id="login-form">
+    <form id="login-form">
       <h2>LiftMaster Account</h2>
+
       <div>
-        <label>Email: </label>
-        <input id="email" type="text" name="search">
+        Email
       </div>
       <div>
-        <label>Password: </label>
-        <input id="password" type="password" name="search">
+        <input id="email" type="text" name="email">
       </div>
+
       <div>
-        <button id="submit">Login</button>
-      </div>
+        Password
+      </div> 
       <div>
-        <label id="message"></label>
+        <input id="password" type="password" name="password">
       </div>
-    </div>
+
+      <div>
+        <input id="submit" type="submit">
+      </div>
+      
+      <div id="message">
+
+      </div>
+    </form>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="script.js"></script>
