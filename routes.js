@@ -193,34 +193,49 @@ router.post('/oauth/token', (req, res, next) => {
 
 router.use((req, res, next) => {
   const token = res.locals.oauth;
-  const { user } = token;
-  const garageDoor = new MyQ(user.username, user.password);
-  return garageDoor.login()
-    .then((result) => {
-      if (result.returnCode === 0) {
-        req.locals.garageDoor = garageDoor;
-        return next();
-      } else {
-        return result;
-      }
-    });
+  if (token) {
+    const { user } = token;
+    const garageDoor = new MyQ(user.username, user.password);
+    garageDoor.login()
+      .then((result) => {
+        if (result.returnCode === 0) {
+          req.locals.garageDoor = garageDoor;
+          return next();
+        } else {
+          return res.json(result);
+        }
+      });
+  } else {
+    const err = new Error('Not Found');
+    err.status = 404;
+    return next(err);
+  }
 });
 
 router.get('/doors', (req, res) => {
   const { garageDoor } = req.locals;
-  return garageDoor.getDoors();
+  return garageDoor.getDoors()
+    .then((result) => {
+      return res.json(result);
+    });
 });
 
 router.get('/door/state', (req, res) => {
   const { id } = req.params;
   const { garageDoor } = req.locals;
-  return garageDoor.getDoorState(doorId);
+  return garageDoor.getDoorState(doorId)
+    .then((result) => {
+      return res.json(result);
+    });
 });
 
 router.put('/door/state', (req, res) => {
   const { id, state } = req.body;
   const { garageDoor } = req.locals;
-  return garageDoor.setDoorState(id, state);
+  return garageDoor.setDoorState(id, state)
+    .then((result) => {
+      return res.json(result);
+    });
 });
 
 router.put('/doors/state', (req, res) => {
@@ -244,7 +259,7 @@ router.put('/doors/state', (req, res) => {
       const result = {
         returnCode: 0
       };
-      return result;
+      return res.json(result);
     });
 });
 
