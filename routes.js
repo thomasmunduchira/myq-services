@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
-const OAuthServer = require('express-oauth-server');
+const OAuthServer = require('oauth2-server');
+const AccessDeniedError = require('oauth2-server/lib/errors/access-denied-error');
+const Request = OAuthServer.Request;
+const Response = OAuthServer.Response;
 const MyQ = require('./node-liftmaster/liftmaster');
 
 const config = require('./config');
@@ -12,28 +15,24 @@ const User = require('./models/user');
 const router = express.Router();
 
 const oauth = new OAuthServer({ 
-  model,
-  useErrorHandler: true
+  model
 });
 
-router.use(express.static(path.join(__dirname, 'public')));
+router.get('/authorize', (req, res, next) => {
+  const { response_type, client_id, redirect_uri, scope, state } = req.query;
+  req.session.response_type = response_type;
+  req.session.client_id = client_id;
+  req.session.redirect_uri = redirect_uri;
+  req.session.scope = scope;
+  req.session.state = state;
+  res.redirect('/login');
+});
 
-router.get('/login', (req, res) => {
-  console.log('weee');
-  model.getAuthorizationCode("48a9a2c3dad3fd143f3d5325ec09e7bb56527864")
-    .then((result) => {
-      console.log('result', result);
-      console.log('hehehe');
-      const { response_type, client_id, redirect_uri, scope, state } = req.query;
-      req.session.response_type = response_type;  
-      req.session.client_id = client_id;
-      req.session.redirect_uri = redirect_uri;
-      req.session.scope = scope;
-      req.session.state = state;
-      res.redirect('/');
-    }).catch((err) => {
-      console.log('err', err);
-    });
+router.get('/login', (req, res, next) => {
+  res.render('pages/login', { 
+    title: 'Login',
+    script: 'login.js'
+  });
 });
 
 router.post('/login', (req, res, next) => {
@@ -71,7 +70,7 @@ router.post('/login', (req, res, next) => {
               req.url = '/oauth/authorize';
               return next();
             } else {
-              res.json({
+              return res.json({
                 success: true,
                 message: "Logged in!"
               });
@@ -80,7 +79,7 @@ router.post('/login', (req, res, next) => {
             console.log(err);
           });
       } else {
-        res.json({
+        return res.json({
           success: false,
           message: result.error
         });
@@ -92,15 +91,94 @@ router.post('/login', (req, res, next) => {
 
 const authenticateHandler = {
   handle: (request, response) => {
-    console.log(request.session.user);
-    return request.session.user;
+    const { username, password } = request.session.user;
+    return User.findOne({
+        username,
+        password
+      }).lean()
+      .catch((err) => {
+        console.log('Error: ', err);
+      });
   }
 };
 
-router.post('/oauth/authorize', oauth.authorize({
-  authenticateHandler
-}));
-router.post('/oauth/token', oauth.token());
-router.post('/oauth/token', oauth.authenticate());
+router.post('/oauth/authorize', (req, res, next) => {
+  const request = new Request(req);
+  const response = new Response(res);
+
+  return oauth.authorize(request, response, {
+      authenticateHandler
+    }).then((code) => {
+      res.locals.oauth = {
+        code
+      };
+      return;
+    }).then(() => {
+      const location = response.headers.location;
+      delete response.headers.location;
+      return res.json({
+        success: true,
+        message: "Logged in!",
+        redirectUri: location
+      });
+    })
+    .catch((error) => {
+      return handleError(error, res, next);
+    });
+});
+
+router.post('/oauth/token', (req, res, next) => {
+  const request = new Request(req);
+  const response = new Response(res);
+
+  return oauth.token(request, response)
+    .then((token) => {
+      res.locals.oauth = {
+        token
+      };
+      return;
+    }).then(() => {
+      return handleResponse(req, res, response);
+    }).catch(function(error) {
+      return handleError(error, res, next);
+    });
+});
+
+router.post('/oauth/token', (req, res, next) => {
+  const request = new Request(req);
+  const response = new Response(res);
+
+  return oauth.authenticate(request, response)
+    .then((token) => {
+      res.locals.oauth = {
+        token
+      };
+      return next();
+    }).catch((error) => {
+      return handleError(error, res, next);
+    });
+});
+
+const handleResponse = (req, res, response) => {
+  if (response.status === 302) {
+    const location = response.headers.location;
+    delete response.headers.location;
+    res.set(response.headers)
+      .redirect(location);
+  } else {
+    res.set(response.headers);
+    res.status(response.status)
+      .send(response.body);
+  }
+};
+
+const handleError = (error, res, next) => {
+  console.log(error);
+  if (error instanceof AccessDeniedError) {
+    return res.send();
+  } else {
+    return next(error);
+  }
+};
 
 module.exports = router;

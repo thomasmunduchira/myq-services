@@ -9,6 +9,11 @@ function login() {
     "password": password
   }).done(function(response) {
     message.html(response.message);
+    if (response.redirectUri) {
+      setTimeout(function() {
+        window.location.href = response.redirectUri;
+      }, 100);
+    }
   }).fail(function(err) {
     console.log(err);
   });
