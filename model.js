@@ -15,6 +15,18 @@ module.exports.getAccessToken = (accessToken) => {
     });
 }
 
+module.exports.getRefreshToken = (refreshToken) => {
+  console.log('getRefreshToken', refreshToken);
+  return Token.findOne({
+      refreshToken
+    }).populate('client')
+    .populate('user')
+    .lean()
+    .catch((err) => {
+      console.log('getRefreshToken - Error: ', err);
+    });
+}
+
 module.exports.getAuthorizationCode = (code) => {
   console.log('getAuthorizationCode', code);
   return AuthorizationCode.findOne({
@@ -111,6 +123,17 @@ module.exports.saveAuthorizationCode = (code, client, user) => {
       console.log('saveAuthorizationCode - Error: ', err);
     });
 };
+
+module.exports.revokeToken = (token) => {
+  console.log('revokeToken', token);
+  return Token.findOneAndRemove({
+      refreshToken: token.refreshToken
+    }).then((removeResult) => {
+      return !!removeResult;
+    }).catch((err) => {
+      console.log('revokeToken - Error: ', err);
+    });
+}
 
 module.exports.revokeAuthorizationCode = (code) => {
   console.log('revokeAuthorizationCode', code);
