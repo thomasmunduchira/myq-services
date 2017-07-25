@@ -51,6 +51,21 @@ input:focus {
   justify-content: center;
 }
 
+#privacy-header,
+#privacy-content {
+  color: #EEEEEE;
+  margin: 0 10vw;
+}
+
+#privacy-header {
+  margin-top: 20px;
+}
+
+#privacy-content {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
 @media only screen and (min-width: 768px) {
   body {
     font-size: 1.0em;

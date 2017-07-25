@@ -28,10 +28,20 @@ router.get('/authorize', (req, res, next) => {
   res.redirect('/login');
 });
 
-router.get('/login', (req, res, next) => {
+router.get('/', (req, res) => {
+  res.redirect('/login');
+});
+
+router.get('/login', (req, res) => {
   res.render('pages/login', { 
-    title: 'Login',
+    title: 'Login | Garage Opener',
     script: 'login.js'
+  });
+});
+
+router.get('/privacy-policy', (req, res) => {
+  res.render('pages/privacy-policy', { 
+    title: 'Privacy Policy | Garage Opener'
   });
 });
 
