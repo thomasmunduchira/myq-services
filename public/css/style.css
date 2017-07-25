@@ -2,7 +2,7 @@ body {
   background: #263238;
   text-align: center;
   font-family: 'Helvetica', 'Arial', sans-serif;
-  font-size: 1.2em;
+  font-size: 1.1em;
 }
 
 div {
@@ -12,11 +12,12 @@ div {
 input {
   border: none;
   width: 70vw;
-  height: 30px;
+  height: 28px;
 }
 
-input[type="text"] {
-  font-size: 1.1em;
+input[type="text"],
+input[type="password"] {
+  font-size: 0.9em;
 }
 
 input:focus {
@@ -41,8 +42,8 @@ input:focus {
   background: #ECEFF1;
   color: #212121;
   width: 84vw;
-  height: 84vh;
-  margin: 8vh auto 0 auto;
+  height: 72vh;
+  margin: 14vh auto 0 auto;
   border-radius: 25px;
   padding: 10px;
   display: flex;
@@ -59,8 +60,9 @@ input:focus {
     width: 20vw;
   }
 
-  input[type="text"] {
-    font-size: 0.9em;
+  input[type="text"],
+  input[type="password"] {
+    font-size: 1em;
   }
 
   #submit {

@@ -10,9 +10,7 @@ function login() {
   }).done(function(response) {
     message.html(response.message);
     if (response.redirectUri) {
-      setTimeout(function() {
-        window.location.href = response.redirectUri;
-      }, 100);
+      window.location.href = response.redirectUri;
     }
   }).fail(function(err) {
     console.log(err);
