@@ -176,7 +176,7 @@ router.post('/oauth/token', (req, res, next) => {
     });
 });
 
-router.post('/oauth/token', (req, res, next) => {
+router.use((req, res, next) => {
   const request = new Request(req);
   const response = new Response(res);
 
@@ -192,24 +192,17 @@ router.post('/oauth/token', (req, res, next) => {
 });
 
 router.use((req, res, next) => {
-  const token = res.locals.oauth;
-  if (token) {
-    const { user } = token;
-    const garageDoor = new MyQ(user.username, user.password);
-    garageDoor.login()
-      .then((result) => {
-        if (result.returnCode === 0) {
-          req.locals.garageDoor = garageDoor;
-          return next();
-        } else {
-          return res.json(result);
-        }
-      });
-  } else {
-    const err = new Error('Not Found');
-    err.status = 404;
-    return next(err);
-  }
+  const user = res.locals.oauth.user;
+  const garageDoor = new MyQ(user.username, user.password);
+  garageDoor.login()
+    .then((result) => {
+      if (result.returnCode === 0) {
+        req.locals.garageDoor = garageDoor;
+        return next();
+      } else {
+        return res.json(result);
+      }
+    });
 });
 
 router.get('/doors', (req, res) => {
