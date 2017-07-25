@@ -99,6 +99,28 @@ router.post('/login', (req, res, next) => {
     });
 });
 
+const handleResponse = (req, res, response) => {
+  if (response.status === 302) {
+    const location = response.headers.location;
+    delete response.headers.location;
+    res.set(response.headers)
+      .redirect(location);
+  } else {
+    res.set(response.headers);
+    res.status(response.status)
+      .send(response.body);
+  }
+};
+
+const handleError = (error, res, next) => {
+  console.log(error);
+  if (error instanceof AccessDeniedError) {
+    return res.send();
+  } else {
+    return next(error);
+  }
+};
+
 const authenticateHandler = {
   handle: (request, response) => {
     const { username, password } = request.session.user;
@@ -169,26 +191,61 @@ router.post('/oauth/token', (req, res, next) => {
     });
 });
 
-const handleResponse = (req, res, response) => {
-  if (response.status === 302) {
-    const location = response.headers.location;
-    delete response.headers.location;
-    res.set(response.headers)
-      .redirect(location);
-  } else {
-    res.set(response.headers);
-    res.status(response.status)
-      .send(response.body);
-  }
-};
+router.use((req, res, next) => {
+  const token = res.locals.oauth;
+  const { user } = token;
+  const garageDoor = new MyQ(user.username, user.password);
+  return garageDoor.login()
+    .then((result) => {
+      if (result.returnCode === 0) {
+        req.locals.garageDoor = garageDoor;
+        return next();
+      } else {
+        return result;
+      }
+    });
+});
 
-const handleError = (error, res, next) => {
-  console.log(error);
-  if (error instanceof AccessDeniedError) {
-    return res.send();
-  } else {
-    return next(error);
-  }
-};
+router.get('/doors', (req, res) => {
+  const { garageDoor } = req.locals;
+  return garageDoor.getDoors();
+});
+
+router.get('/door/state', (req, res) => {
+  const { id } = req.params;
+  const { garageDoor } = req.locals;
+  return garageDoor.getDoorState(doorId);
+});
+
+router.put('/door/state', (req, res) => {
+  const { id, state } = req.body;
+  const { garageDoor } = req.locals;
+  return garageDoor.setDoorState(id, state);
+});
+
+router.put('/doors/state', (req, res) => {
+  const { state } = req.body;
+  const { garageDoor } = req.locals;
+  return garageDoor.getDoors()
+    .then((result) => {
+      if (result.returnCode !== 0) {
+        return result;
+      }
+      const doors = result.doors;
+      return Promise.all(doors.map((door) => {
+        return garageDoor.setDoorState(door.id, state);
+      }));
+    }).then((results) => {
+      for (let result in results) {
+        if (result.returnCode !== 0) {
+          return result;
+        }
+      }
+      const result = {
+        returnCode: 0
+      };
+      return result;
+    });
+});
 
 module.exports = router;
