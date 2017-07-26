@@ -34,14 +34,14 @@ router.get('/', (req, res) => {
 
 router.get('/login', (req, res) => {
   res.render('pages/login', { 
-    title: 'Login | Garage Opener',
+    title: 'Login | MyQ Garage Opener',
     script: 'login.js'
   });
 });
 
 router.get('/privacy-policy', (req, res) => {
   res.render('pages/privacy-policy', { 
-    title: 'Privacy Policy | Garage Opener'
+    title: 'Privacy Policy | MyQ Garage Opener'
   });
 });
 

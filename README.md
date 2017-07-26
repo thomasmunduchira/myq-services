@@ -1,2 +1,2 @@
-# liftmaster-api
-LiftMaster API with OAuth 2.0
+# myq-site
+Website to interface with MyQ accounts and devices

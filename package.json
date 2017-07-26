@@ -1,7 +1,7 @@
 {
-  "name": "liftmaster-api",
+  "name": "myq-site",
   "version": "1.0.0",
-  "description": "LiftMaster API with OAuth 2.0",
+  "description": "Website to interface with MyQ accounts and devices",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
