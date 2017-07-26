@@ -216,7 +216,7 @@ router.get('/doors', (req, res) => {
 router.get('/door/state', (req, res) => {
   const { id } = req.query;
   const { garageDoor } = res.locals;
-  return garageDoor.getDoorState(doorId)
+  return garageDoor.getDoorState(id)
     .then((result) => {
       return res.json(result);
     });
