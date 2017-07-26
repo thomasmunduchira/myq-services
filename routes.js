@@ -194,7 +194,7 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
   const user = res.locals.oauth.user;
   const garageDoor = new MyQ(user.username, user.password);
-  garageDoor.login()
+  return garageDoor.login()
     .then((result) => {
       if (result.returnCode === 0) {
         res.locals.garageDoor = garageDoor;
