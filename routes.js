@@ -197,7 +197,7 @@ router.use((req, res, next) => {
   garageDoor.login()
     .then((result) => {
       if (result.returnCode === 0) {
-        req.locals.garageDoor = garageDoor;
+        res.locals.garageDoor = garageDoor;
         return next();
       } else {
         return res.json(result);
@@ -206,7 +206,7 @@ router.use((req, res, next) => {
 });
 
 router.get('/doors', (req, res) => {
-  const { garageDoor } = req.locals;
+  const { garageDoor } = res.locals;
   return garageDoor.getDoors()
     .then((result) => {
       return res.json(result);
@@ -214,8 +214,8 @@ router.get('/doors', (req, res) => {
 });
 
 router.get('/door/state', (req, res) => {
-  const { id } = req.params;
-  const { garageDoor } = req.locals;
+  const { id } = req.query;
+  const { garageDoor } = res.locals;
   return garageDoor.getDoorState(doorId)
     .then((result) => {
       return res.json(result);
@@ -224,7 +224,7 @@ router.get('/door/state', (req, res) => {
 
 router.put('/door/state', (req, res) => {
   const { id, state } = req.body;
-  const { garageDoor } = req.locals;
+  const { garageDoor } = res.locals;
   return garageDoor.setDoorState(id, state)
     .then((result) => {
       return res.json(result);
@@ -233,7 +233,7 @@ router.put('/door/state', (req, res) => {
 
 router.put('/doors/state', (req, res) => {
   const { state } = req.body;
-  const { garageDoor } = req.locals;
+  const { garageDoor } = res.locals;
   return garageDoor.getDoors()
     .then((result) => {
       if (result.returnCode !== 0) {
