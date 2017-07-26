@@ -192,7 +192,7 @@ router.use((req, res, next) => {
 });
 
 router.use((req, res, next) => {
-  const user = res.locals.oauth.user;
+  const { user } = res.locals.oauth.token;
   const garageDoor = new MyQ(user.username, user.password);
   return garageDoor.login()
     .then((result) => {
