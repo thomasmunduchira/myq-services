@@ -4,7 +4,7 @@ const OAuthServer = require('oauth2-server');
 const AccessDeniedError = require('oauth2-server/lib/errors/access-denied-error');
 const Request = OAuthServer.Request;
 const Response = OAuthServer.Response;
-const MyQ = require('./node-liftmaster/liftmaster');
+const MyQ = require('./myq-api/myq');
 
 const config = require('./config');
 const model = require('./model');
