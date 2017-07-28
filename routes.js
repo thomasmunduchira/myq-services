@@ -46,7 +46,8 @@ router.get('/privacy-policy', (req, res) => {
 });
 
 router.post('/login', (req, res, next) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  email = email.replace(/\s/g, '');
   const garageDoor = new MyQ(email, password);
   return garageDoor.login()
     .then((result) => {
