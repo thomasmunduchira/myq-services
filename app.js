@@ -53,7 +53,7 @@ app.use('/', routes);
 app.use((req, res, next) => {
   const err = new Error('Not Found!');
   err.status = 404;
-  next(err);
+  return next(err);
 });
 
 app.use((err, req, res, next) => {
@@ -65,5 +65,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(3000, () => {
-  console.log('LiftMaster API listening on port 3000!');
+  console.log('MyQ site listening on port 3000!');
 });

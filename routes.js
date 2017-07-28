@@ -18,29 +18,29 @@ const oauth = new OAuthServer({
   model
 });
 
-router.get('/authorize', (req, res, next) => {
-  const { response_type, client_id, redirect_uri, scope, state } = req.query;
-  req.session.response_type = response_type;
-  req.session.client_id = client_id;
-  req.session.redirect_uri = redirect_uri;
-  req.session.scope = scope;
-  req.session.state = state;
-  res.redirect('/login');
-});
-
 router.get('/', (req, res) => {
-  res.redirect('/login');
+  return res.redirect('/authorize');
 });
 
 router.get('/login', (req, res) => {
-  res.render('pages/login', { 
+  return res.redirect('/authorize');
+});
+
+router.get('/authorize', (req, res) => {
+  const { response_type, client_id, redirect_uri, scope, state } = req.query;
+  if (response_type && client_id && redirect_uri && scope && state) {
+    req.session.query = Object.assign({}, req.query);
+  } else {
+    delete req.session.query;
+  }
+  return res.render('pages/login', { 
     title: 'Login | MyQ Garage Opener',
     script: 'login.js'
   });
 });
 
 router.get('/privacy-policy', (req, res) => {
-  res.render('pages/privacy-policy', { 
+  return res.render('pages/privacy-policy', { 
     title: 'Privacy Policy | MyQ Garage Opener'
   });
 });
@@ -48,7 +48,7 @@ router.get('/privacy-policy', (req, res) => {
 router.post('/login', (req, res, next) => {
   const { email, password } = req.body;
   const garageDoor = new MyQ(email, password);
-  garageDoor.login()
+  return garageDoor.login()
     .then((result) => {
       if (result.returnCode === 0) {
         req.session.user = {
@@ -70,23 +70,24 @@ router.post('/login', (req, res, next) => {
               return newUser.save();
             }
           }).then((saveResult) => {
-            if (req.session.response_type === 'code') {
-              const { response_type, client_id, redirect_uri, scope, state } = req.session;
-              req.query.response_type = response_type;  
-              req.query.client_id = client_id;
-              req.query.redirect_uri = redirect_uri;
-              req.query.scope = scope;
-              req.query.state = state;
+            const query = req.session.query || {};
+            const { response_type, client_id, redirect_uri, scope, state } = query;
+            if (response_type && client_id && redirect_uri && scope && state) {
+              req.query = Object.assign({}, req.session.query);
               req.url = '/oauth/authorize';
               return next();
             } else {
               return res.json({
                 success: true,
-                message: "Logged in!"
+                message: 'Logged in!'
               });
             }
           }).catch((err) => {
-            console.log(err);
+            console.error(err);
+            return res.json({
+              success: false,
+              message: 'Something unexpected happened. Please wait a bit and try again.'
+            });
           });
       } else {
         return res.json({
@@ -95,7 +96,11 @@ router.post('/login', (req, res, next) => {
         });
       }
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
+      return res.json({
+        success: false,
+        message: 'Something unexpected happened. Please wait a bit and try again.'
+      });
     });
 });
 
@@ -103,17 +108,17 @@ const handleResponse = (req, res, response) => {
   if (response.status === 302) {
     const location = response.headers.location;
     delete response.headers.location;
-    res.set(response.headers)
-      .redirect(location);
+    res.set(response.headers);
+    return res.redirect(location);
   } else {
     res.set(response.headers);
-    res.status(response.status)
-      .send(response.body);
+    res.status(response.status);
+    return res.send(response.body);
   }
 };
 
 const handleError = (error, res, next) => {
-  console.log(error);
+  console.error(error);
   if (error instanceof AccessDeniedError) {
     return res.send();
   } else {
@@ -129,7 +134,8 @@ const authenticateHandler = {
         password
       }).lean()
       .catch((err) => {
-        console.log('Error: ', err);
+        console.error(err);
+        return next(error);
       });
   }
 };
@@ -144,17 +150,14 @@ router.post('/oauth/authorize', (req, res, next) => {
       res.locals.oauth = {
         code
       };
-      return;
-    }).then(() => {
       const location = response.headers.location;
       delete response.headers.location;
       return res.json({
         success: true,
-        message: "Logged in!",
+        message: "Logged in! Redirecting you to the confirmation page.",
         redirectUri: location
       });
-    })
-    .catch((error) => {
+    }).catch((error) => {
       return handleError(error, res, next);
     });
 });
@@ -168,10 +171,8 @@ router.post('/oauth/token', (req, res, next) => {
       res.locals.oauth = {
         token
       };
-      return;
-    }).then(() => {
       return handleResponse(req, res, response);
-    }).catch(function(error) {
+    }).catch((error) => {
       return handleError(error, res, next);
     });
 });
@@ -244,7 +245,7 @@ router.put('/doors/state', (req, res) => {
         return garageDoor.setDoorState(door.id, state);
       }));
     }).then((results) => {
-      for (let result in results) {
+      for (let result of results) {
         if (result.returnCode !== 0) {
           return result;
         }
