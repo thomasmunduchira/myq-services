@@ -35,13 +35,16 @@ router.get('/authorize', (req, res) => {
   }
   return res.render('pages/login', { 
     title: 'Login | MyQ Garage Opener',
-    script: 'login.js'
+    stylesheets: ['login.css'],
+    scripts: ['login.js']
   });
 });
 
 router.get('/privacy-policy', (req, res) => {
   return res.render('pages/privacy-policy', { 
-    title: 'Privacy Policy | MyQ Garage Opener'
+    title: 'Privacy Policy | MyQ Garage Opener',
+    stylesheets: ['privacy-policy.css'],
+    scripts: []
   });
 });
 

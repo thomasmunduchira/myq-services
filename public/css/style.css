@@ -3,67 +3,18 @@ body {
   text-align: center;
   font-family: 'Helvetica', 'Arial', sans-serif;
   font-size: 1.1em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   height: 100vh;
-}
-
-div {
-  padding-bottom: 10px;
 }
 
 input {
   border: none;
-  width: 300px;
-  height: 28px;
-}
-
-input[type="text"],
-input[type="password"] {
-  font-size: 1em;
 }
 
 input:focus {
   outline: none;
 }
 
-#submit {
-  background: #FAFAFA;
-  border: none;
-  outline: none;
-  width: 70px;
-  height: 30px;
+input[type="text"],
+input[type="password"] {
   font-size: 1em;
-}
-
-#submit:hover {
-  background: #E0E0E0;
-  cursor: pointer;
-}
-
-#login-form {
-  background: #ECEFF1;
-  color: #212121;
-  width: 340px;
-  height: 400px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-#privacy-header,
-#privacy-content {
-  color: #EEEEEE;
-  margin: 0 10vw;
-}
-
-#privacy-header {
-  margin-top: 40px;
-}
-
-#privacy-content {
-  text-align: left;
-  margin-bottom: 20px;
 }

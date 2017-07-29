@@ -1,0 +1,14 @@
+#privacy-header,
+#privacy-content {
+  color: #EEEEEE;
+  margin: 0 5vw;
+}
+
+#privacy-header {
+  margin-top: 40px;
+}
+
+#privacy-content {
+  text-align: left;
+  margin-bottom: 20px;
+}
