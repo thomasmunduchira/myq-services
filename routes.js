@@ -214,6 +214,7 @@ router.get('/doors', (req, res) => {
   const { garageDoor } = res.locals;
   return garageDoor.getDoors()
     .then((result) => {
+      console.log('GET doors:', result);
       return res.json(result);
     });
 });
@@ -223,6 +224,7 @@ router.get('/door/state', (req, res) => {
   const { garageDoor } = res.locals;
   return garageDoor.getDoorState(id)
     .then((result) => {
+      console.log('GET door state:', result);
       return res.json(result);
     });
 });
@@ -232,6 +234,7 @@ router.put('/door/state', (req, res) => {
   const { garageDoor } = res.locals;
   return garageDoor.setDoorState(id, state)
     .then((result) => {
+      console.log('PUT door state:', result);
       return res.json(result);
     });
 });
