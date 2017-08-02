@@ -51,8 +51,8 @@ router.get('/privacy-policy', (req, res) => {
 router.post('/login', (req, res, next) => {
   let { email, password } = req.body;
   email = email.replace(/\s/g, '');
-  const garageDoor = new MyQ(email, password);
-  return garageDoor.login()
+  const account = new MyQ(email, password);
+  return account.login()
     .then((result) => {
       if (result.returnCode === 0) {
         req.session.user = {
@@ -198,11 +198,11 @@ router.use((req, res, next) => {
 
 router.use((req, res, next) => {
   const { user } = res.locals.oauth.token;
-  const garageDoor = new MyQ(user.username, user.password);
-  return garageDoor.login()
+  const account = new MyQ(user.username, user.password);
+  return account.login()
     .then((result) => {
       if (result.returnCode === 0) {
-        res.locals.garageDoor = garageDoor;
+        res.locals.account = account;
         return next();
       } else {
         return res.json(result);
@@ -210,19 +210,20 @@ router.use((req, res, next) => {
     });
 });
 
-router.get('/doors', (req, res) => {
-  const { garageDoor } = res.locals;
-  return garageDoor.getDoors()
+router.get('/devices', (req, res) => {
+  const { account } = res.locals;
+  const typeIds = [2, 3, 5, 7, 17]
+  return account.getDevices(typeIds)
     .then((result) => {
-      console.log('GET doors:', result);
+      console.log('GET devices:', result);
       return res.json(result);
     });
 });
 
 router.get('/door/state', (req, res) => {
   const { id } = req.query;
-  const { garageDoor } = res.locals;
-  return garageDoor.getDoorState(id)
+  const { account } = res.locals;
+  return account.getDoorState(id)
     .then((result) => {
       console.log('GET door state:', result);
       return res.json(result);
@@ -231,35 +232,30 @@ router.get('/door/state', (req, res) => {
 
 router.put('/door/state', (req, res) => {
   const { id, state } = req.body;
-  const { garageDoor } = res.locals;
-  return garageDoor.setDoorState(id, state)
+  const { account } = res.locals;
+  return account.setDoorState(id, state)
     .then((result) => {
       console.log('PUT door state:', result);
       return res.json(result);
     });
 });
 
-router.put('/doors/state', (req, res) => {
-  const { state } = req.body;
-  const { garageDoor } = res.locals;
-  return garageDoor.getDoors()
+router.get('/light/state', (req, res) => {
+  const { id } = req.query;
+  const { account } = res.locals;
+  return account.setLightState(id)
     .then((result) => {
-      if (result.returnCode !== 0) {
-        return result;
-      }
-      const doors = result.doors;
-      return Promise.all(doors.map((door) => {
-        return garageDoor.setDoorState(door.id, state);
-      }));
-    }).then((results) => {
-      for (let result of results) {
-        if (result.returnCode !== 0) {
-          return result;
-        }
-      }
-      const result = {
-        returnCode: 0
-      };
+      console.log('GET light state:', result);
+      return res.json(result);
+    });
+});
+
+router.put('/light/state', (req, res) => {
+  const { id, state } = req.body;
+  const { account } = res.locals;
+  return account.setLightState(id, state)
+    .then((result) => {
+      console.log('PUT light state:', result);
       return res.json(result);
     });
 });
