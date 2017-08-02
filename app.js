@@ -23,7 +23,7 @@ db.once('open', () => {
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
-hbs.registerPartials('./views/partials');
+hbs.registerPartials(path.join(__dirname, 'views/partials'));
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
