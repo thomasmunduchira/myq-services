@@ -19,14 +19,10 @@ const oauth = new OAuthServer({
 });
 
 router.get('/', (req, res) => {
-  return res.redirect('/authorize');
+  return res.redirect('/login');
 });
 
 router.get('/login', (req, res) => {
-  return res.redirect('/authorize');
-});
-
-router.get('/authorize', (req, res) => {
   const { response_type, client_id, redirect_uri, scope, state } = req.query;
   if (response_type && client_id && redirect_uri && scope && state) {
     req.session.query = Object.assign({}, req.query);
@@ -50,7 +46,13 @@ router.get('/privacy-policy', (req, res) => {
 
 router.post('/login', (req, res, next) => {
   let { email, password } = req.body;
-  email = email.replace(/\s/g, '');
+  if (!email || email === "" || !password || password === "") {
+    return res.json({
+      success: false,
+      message: 'Email and/or password are incorrect.'
+    });
+  }
+  email = email.replace(/\s/g, '').toLowerCase();
   const account = new MyQ(email, password);
   return account.login()
     .then((result) => {
