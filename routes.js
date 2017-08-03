@@ -30,7 +30,7 @@ router.get('/login', (req, res) => {
     delete req.session.query;
   }
   return res.render('pages/login', { 
-    title: 'Login | MyQ Garage Opener',
+    title: 'Login | MyQ Home',
     stylesheets: ['login.css'],
     scripts: ['login.js']
   });
@@ -38,7 +38,7 @@ router.get('/login', (req, res) => {
 
 router.get('/privacy-policy', (req, res) => {
   return res.render('pages/privacy-policy', { 
-    title: 'Privacy Policy | MyQ Garage Opener',
+    title: 'Privacy Policy | MyQ Home',
     stylesheets: ['privacy-policy.css'],
     scripts: []
   });

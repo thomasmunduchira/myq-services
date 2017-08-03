@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
 
   res.status(err.status || 500);
   return res.render('error', { 
-    title: '404 | MyQ Garage Opener',
+    title: '404 | MyQ Home',
     stylesheets: ['error.css'],
     scripts: []
   });
