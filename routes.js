@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
 router.get('/login', (req, res) => {
   const { response_type, client_id, redirect_uri, scope, state } = req.query;
   if (response_type && client_id && redirect_uri && scope && state) {
-    req.session.query = Object.assign({}, req.query);
+    req.session.query = req.query;
   } else {
     delete req.session.query;
   }
@@ -79,7 +79,7 @@ router.post('/login', (req, res, next) => {
             const query = req.session.query || {};
             const { response_type, client_id, redirect_uri, scope, state } = query;
             if (response_type && client_id && redirect_uri && scope && state) {
-              req.query = Object.assign({}, req.session.query);
+              req.query = req.session.query;
               req.url = '/oauth/authorize';
               return next();
             } else {
@@ -156,12 +156,17 @@ router.post('/oauth/authorize', (req, res, next) => {
       res.locals.oauth = {
         code
       };
-      const location = response.headers.location;
-      delete response.headers.location;
-      return res.json({
-        success: true,
-        message: "Logged in! Redirecting you to the confirmation page.",
-        redirectUri: location
+      req.session.destroy((err) => {
+        if (err) {
+          console.error(err);
+        }
+        const location = response.headers.location;
+        delete response.headers.location;
+        return res.json({
+          success: true,
+          message: "Logged in! Redirecting you to the confirmation page.",
+          redirectUri: location
+        });
       });
     }).catch((error) => {
       return handleError(error, res, next);
