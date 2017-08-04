@@ -5,6 +5,9 @@ const config = {
   session: {
     secret: SESSION_SECRET
   },
+  hashing: {
+    saltRounds: SALT_ROUNDS
+  },
   email: EMAIL
 };
 
