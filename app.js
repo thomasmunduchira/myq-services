@@ -14,6 +14,7 @@ const app = express();
 
 const env = process.env.NODE_ENV || 'development';
 
+mongoose.Promise = global.Promise;
 mongoose.connect(config.db.url);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));

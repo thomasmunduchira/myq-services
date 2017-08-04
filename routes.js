@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const OAuthServer = require('oauth2-server');
 const AccessDeniedError = require('oauth2-server/lib/errors/access-denied-error');
 const Request = OAuthServer.Request;
@@ -19,10 +20,10 @@ const oauth = new OAuthServer({
 });
 
 router.get('/', (req, res) => {
-  return res.redirect('/login');
+  return res.redirect('/authorize');
 });
 
-router.get('/login', (req, res) => {
+router.get('/authorize', (req, res) => {
   const { response_type, client_id, redirect_uri, scope, state } = req.query;
   if (response_type && client_id && redirect_uri && scope && state) {
     req.session.query = req.query;
@@ -46,7 +47,7 @@ router.get('/privacy-policy', (req, res) => {
 
 router.post('/login', (req, res, next) => {
   let { email, password } = req.body;
-  if (!email || email === "" || !password || password === "") {
+  if (!email || !password) {
     return res.json({
       success: false,
       message: 'Email and/or password are incorrect.'
@@ -56,51 +57,42 @@ router.post('/login', (req, res, next) => {
   const account = new MyQ(email, password);
   return account.login()
     .then((result) => {
-      if (result.returnCode === 0) {
-        req.session.user = {
-          username: email,
-          password,
-          securityToken: result.token
-        };
-        User.findOne({
-            username: email
-          }).then((findResult) => {
-            if (findResult) {
-              if (findResult.password !== password || findResult.securityToken !== result.token) {
-                findResult.password = password;
-                findResult.securityToken = result.token;
-                return findResult.save();
-              }
-            } else {
-              const newUser = new User(req.session.user);
-              return newUser.save();
-            }
-          }).then((saveResult) => {
-            const query = req.session.query || {};
-            const { response_type, client_id, redirect_uri, scope, state } = query;
-            if (response_type && client_id && redirect_uri && scope && state) {
-              req.query = req.session.query;
-              req.url = '/oauth/authorize';
-              return next();
-            } else {
-              return res.json({
-                success: true,
-                message: 'Logged in!'
-              });
-            }
-          }).catch((err) => {
-            console.error(err);
-            return res.json({
-              success: false,
-              message: 'Something unexpected happened. Please wait a bit and try again.'
-            });
-          });
-      } else {
+      if (result.returnCode !== 0) {
         return res.json({
           success: false,
           message: result.error
         });
       }
+      req.session.user = {
+        username: email,
+        securityToken: result.token
+      };
+      return bcrypt.hash(password, config.hashing.saltRounds);
+    }).then((hash) => {
+      req.session.user.password = hash;
+      return User.findOne({
+        username: email
+      });
+    }).then((findResult) => {
+      if (!findResult) {
+        const newUser = new User(req.session.user);
+        return newUser.save();
+      }
+      findResult.password = req.session.user.password;
+      findResult.securityToken = req.session.user.securityToken;
+      return findResult.save();
+    }).then((saveResult) => {
+      const query = req.session.query || {};
+      const { response_type, client_id, redirect_uri, scope, state } = query;
+      if (!response_type || !client_id || !redirect_uri || !scope || !state) {
+        return res.json({
+          success: true,
+          message: 'Logged in!'
+        });
+      }
+      req.query = req.session.query;
+      req.url = '/oauth/authorize';
+      return next();
     }).catch((err) => {
       console.error(err);
       return res.json({
@@ -111,25 +103,23 @@ router.post('/login', (req, res, next) => {
 });
 
 const handleResponse = (req, res, response) => {
-  if (response.status === 302) {
-    const location = response.headers.location;
-    delete response.headers.location;
-    res.set(response.headers);
-    return res.redirect(location);
-  } else {
+  if (response.status !== 302) {
     res.set(response.headers);
     res.status(response.status);
     return res.send(response.body);
   }
+  const location = response.headers.location;
+  delete response.headers.location;
+  res.set(response.headers);
+  return res.redirect(location);
 };
 
 const handleError = (error, res, next) => {
   console.error(error);
   if (error instanceof AccessDeniedError) {
     return res.send();
-  } else {
-    return next(error);
   }
+  return next(error);
 };
 
 const authenticateHandler = {
