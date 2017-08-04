@@ -195,16 +195,9 @@ router.use((req, res, next) => {
 
 router.use((req, res, next) => {
   const { user } = res.locals.oauth.token;
-  const account = new MyQ(user.username, user.password);
-  return account.login()
-    .then((result) => {
-      if (result.returnCode === 0) {
-        res.locals.account = account;
-        return next();
-      } else {
-        return res.json(result);
-      }
-    });
+  const account = new MyQ(user.securityToken);
+  res.locals.account = account;
+  return next();
 });
 
 router.get('/devices', (req, res) => {
