@@ -52,20 +52,32 @@ app.use(session(sess));
 app.use('/', routes);
 
 app.use((req, res, next) => {
-  const err = new Error('Not Found!');
+  const err = new Error('Not Found');
   err.status = 404;
   return next(err);
 });
 
 app.use((err, req, res, next) => {
+  if (err.message === 'requestFinalized') {
+    return;
+  }
+
+  console.error(err.status, err);
+
   res.locals.message = err.message;
   res.locals.error = env === 'development' ? err : {};
 
   res.status(err.status || 500);
-  return res.render('error', { 
-    title: '404 | MyQ Home',
-    stylesheets: ['error.css'],
-    scripts: []
+  if (err.status === 404) {
+    return res.render('error', { 
+      title: '404 | MyQ Home',
+      stylesheets: ['error.css'],
+      scripts: []
+    });
+  }
+  return res.json({
+    success: false,
+    message: 'Something unexpected happened. Please wait a bit and try again.'
   });
 });
 

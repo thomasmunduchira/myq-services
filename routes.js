@@ -45,23 +45,31 @@ router.get('/privacy-policy', (req, res) => {
   });
 });
 
+router.get('*', (req, res, next) => {
+  const err = new Error('Not Found');
+  err.status = 404;
+  return next(err);
+});
+
 router.post('/login', (req, res, next) => {
   let { email, password } = req.body;
   if (!email || !password) {
-    return res.json({
+    res.json({
       success: false,
       message: 'Email and/or password are incorrect.'
     });
+    throw new Error('requestFinalized');
   }
   email = email.replace(/\s/g, '').toLowerCase();
   const account = new MyQ(email, password);
   return account.login()
     .then((result) => {
       if (result.returnCode !== 0) {
-        return res.json({
+        res.json({
           success: false,
           message: result.error
         });
+        throw new Error('requestFinalized');
       }
       req.session.user = {
         username: email,
@@ -85,20 +93,17 @@ router.post('/login', (req, res, next) => {
       const query = req.session.query || {};
       const { response_type, client_id, redirect_uri, scope, state } = query;
       if (!response_type || !client_id || !redirect_uri || !scope || !state) {
-        return res.json({
+        res.json({
           success: true,
           message: 'Logged in!'
         });
+        throw new Error('requestFinalized');
       }
       req.query = req.session.query;
       req.url = '/oauth/authorize';
       return next();
     }).catch((err) => {
-      console.error(err);
-      return res.json({
-        success: false,
-        message: 'Something unexpected happened. Please wait a bit and try again.'
-      });
+      next(err);
     });
 });
 
@@ -114,12 +119,11 @@ const handleResponse = (req, res, response) => {
   return res.redirect(location);
 };
 
-const handleError = (error, res, next) => {
-  console.error(error);
-  if (error instanceof AccessDeniedError) {
+const handleError = (err, res, next) => {
+  if (err instanceof AccessDeniedError) {
     return res.send();
   }
-  return next(error);
+  return next(err);
 };
 
 const authenticateHandler = {
@@ -130,8 +134,7 @@ const authenticateHandler = {
         password
       }).lean()
       .catch((err) => {
-        console.error(err);
-        return next(error);
+        return next(err);
       });
   }
 };
@@ -158,8 +161,8 @@ router.post('/oauth/authorize', (req, res, next) => {
           redirectUri: location
         });
       });
-    }).catch((error) => {
-      return handleError(error, res, next);
+    }).catch((err) => {
+      return handleError(err, res, next);
     });
 });
 
@@ -173,8 +176,8 @@ router.post('/oauth/token', (req, res, next) => {
         token
       };
       return handleResponse(req, res, response);
-    }).catch((error) => {
-      return handleError(error, res, next);
+    }).catch((err) => {
+      return handleError(err, res, next);
     });
 });
 
@@ -188,8 +191,8 @@ router.use((req, res, next) => {
         token
       };
       return next();
-    }).catch((error) => {
-      return handleError(error, res, next);
+    }).catch((err) => {
+      return handleError(err, res, next);
     });
 });
 
@@ -207,6 +210,8 @@ router.get('/devices', (req, res) => {
     .then((result) => {
       console.log('GET devices:', result);
       return res.json(result);
+    }).catch((err) => {
+      return next(err);
     });
 });
 
@@ -217,6 +222,8 @@ router.get('/door/state', (req, res) => {
     .then((result) => {
       console.log('GET door state:', result);
       return res.json(result);
+    }).catch((err) => {
+      return next(err);
     });
 });
 
@@ -227,6 +234,8 @@ router.put('/door/state', (req, res) => {
     .then((result) => {
       console.log('PUT door state:', result);
       return res.json(result);
+    }).catch((err) => {
+      return next(err);
     });
 });
 
@@ -237,6 +246,8 @@ router.get('/light/state', (req, res) => {
     .then((result) => {
       console.log('GET light state:', result);
       return res.json(result);
+    }).catch((err) => {
+      return next(err);
     });
 });
 
@@ -247,6 +258,8 @@ router.put('/light/state', (req, res) => {
     .then((result) => {
       console.log('PUT light state:', result);
       return res.json(result);
+    }).catch((err) => {
+      return next(err);
     });
 });
 
