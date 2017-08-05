@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const OAuthServer = require('oauth2-server');
 const AccessDeniedError = require('oauth2-server/lib/errors/access-denied-error');
 const Request = OAuthServer.Request;
@@ -13,13 +13,43 @@ const Token = require('./models/token');
 const Client = require('./models/client');
 const User = require('./models/user');
 
-const authenticatedRoutes = ['/devices', '/door/state', '/light/state'];
-
 const router = express.Router();
 
 const oauth = new OAuthServer({ 
   model
 });
+
+const encrypt = (text) => {
+  const { algorithm, masterKey, pbkdf2Rounds, pbkdf2KeyLength, pbkdf2Digest } = config.encryption;
+  try {
+    const iv = crypto.randomBytes(12);
+    const salt = crypto.randomBytes(64);
+    const key = crypto.pbkdf2Sync(masterKey, salt, pbkdf2Rounds, pbkdf2KeyLength, pbkdf2Digest);
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return Buffer.concat([salt, iv, tag, encrypted]).toString('base64');
+  } catch (err) {
+    return next(err);
+  }
+}
+
+const decrypt = (encrypted) => {
+  const { algorithm, masterKey, pbkdf2Rounds, pbkdf2KeyLength, pbkdf2Digest } = config.encryption;
+  try {
+    const data = new Buffer(encrypted, 'base64');
+    const salt = data.slice(0, 64);
+    const iv = data.slice(64, 76);
+    const tag = data.slice(76, 92);
+    const text = data.slice(92);
+    const key = crypto.pbkdf2Sync(masterKey, salt, pbkdf2Rounds, pbkdf2KeyLength, pbkdf2Digest);
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    decipher.setAuthTag(tag);
+    return decipher.update(text, 'binary', 'utf8') + decipher.final('utf8');
+  } catch (err) {
+    return next(err);
+  }
+}
 
 router.get('/', (req, res) => {
   return res.redirect('/authorize');
@@ -69,11 +99,9 @@ router.post('/login', (req, res, next) => {
       }
       req.session.user = {
         username: email,
+        password: encrypt(password),
         securityToken: result.token
       };
-      return bcrypt.hash(password, config.hashing.saltRounds);
-    }).then((hash) => {
-      req.session.user.password = hash;
       return User.findOne({
         username: email
       });
@@ -177,7 +205,7 @@ router.post('/oauth/token', (req, res, next) => {
     });
 });
 
-router.use(authenticatedRoutes, (req, res, next) => {
+router.use(config.authenticatedRoutes, (req, res, next) => {
   const request = new Request(req);
   const response = new Response(res);
 
@@ -192,11 +220,20 @@ router.use(authenticatedRoutes, (req, res, next) => {
     });
 });
 
-router.use(authenticatedRoutes, (req, res, next) => {
+router.use(config.authenticatedRoutes, (req, res, next) => {
   const { user } = res.locals.oauth.token;
-  const account = new MyQ(user.securityToken);
-  res.locals.account = account;
-  return next();
+  const account = new MyQ(user.username, decrypt(user.password));
+  return account.login()
+    .then((result) => {
+      if (result.returnCode === 0) {
+        console.log('Authenticate success');
+        res.locals.account = account;
+        return next();
+      } else {
+        console.log('Authenticate failure');
+        return res.json(result);
+      }
+    });
 });
 
 router.get('/devices', (req, res) => {
@@ -204,7 +241,7 @@ router.get('/devices', (req, res) => {
   const typeIds = [2, 3, 5, 7, 17]
   return account.getDevices(typeIds)
     .then((result) => {
-      console.log('GET devices:', result);
+      console.log('GET /devices:', result);
       return res.json(result);
     }).catch((err) => {
       return next(err);
@@ -216,7 +253,7 @@ router.get('/door/state', (req, res) => {
   const { account } = res.locals;
   return account.getDoorState(id)
     .then((result) => {
-      console.log('GET door state:', result);
+      console.log('GET /door/state:', result);
       return res.json(result);
     }).catch((err) => {
       return next(err);
@@ -228,7 +265,7 @@ router.put('/door/state', (req, res) => {
   const { account } = res.locals;
   return account.setDoorState(id, state)
     .then((result) => {
-      console.log('PUT door state:', result);
+      console.log('PUT /door/state:', result);
       return res.json(result);
     }).catch((err) => {
       return next(err);
@@ -240,7 +277,7 @@ router.get('/light/state', (req, res) => {
   const { account } = res.locals;
   return account.setLightState(id)
     .then((result) => {
-      console.log('GET light state:', result);
+      console.log('GET /light/state:', result);
       return res.json(result);
     }).catch((err) => {
       return next(err);
@@ -252,7 +289,7 @@ router.put('/light/state', (req, res) => {
   const { account } = res.locals;
   return account.setLightState(id, state)
     .then((result) => {
-      console.log('PUT light state:', result);
+      console.log('PUT /light/state:', result);
       return res.json(result);
     }).catch((err) => {
       return next(err);

@@ -1,14 +1,18 @@
 const config = {
   db: {
-    url: DB_URL
+    url: 'DB_URL'
   },
   session: {
-    secret: SESSION_SECRET
+    secret: 'SESSION_SECRET'
   },
-  hashing: {
-    saltRounds: SALT_ROUNDS
+  encryption: {
+    algorithm: 'aes-256-gcm',
+    masterKey: 'MASTER_KEY',
+    pbkdf2Rounds: 10000,
+    pbkdf2KeyLength: 32,
+    pbkdf2Digest: 'sha512'
   },
-  email: EMAIL
+  authenticatedRoutes: ['/devices', '/door/state', '/light/state']
 };
 
 module.exports = config;
