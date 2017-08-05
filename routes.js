@@ -13,6 +13,8 @@ const Token = require('./models/token');
 const Client = require('./models/client');
 const User = require('./models/user');
 
+const authenticatedRoutes = ['/devices', '/door/state', '/light/state'];
+
 const router = express.Router();
 
 const oauth = new OAuthServer({ 
@@ -43,12 +45,6 @@ router.get('/privacy-policy', (req, res) => {
     stylesheets: ['privacy-policy.css'],
     scripts: []
   });
-});
-
-router.get('*', (req, res, next) => {
-  const err = new Error('Not Found');
-  err.status = 404;
-  return next(err);
 });
 
 router.post('/login', (req, res, next) => {
@@ -181,7 +177,7 @@ router.post('/oauth/token', (req, res, next) => {
     });
 });
 
-router.use((req, res, next) => {
+router.use(authenticatedRoutes, (req, res, next) => {
   const request = new Request(req);
   const response = new Response(res);
 
@@ -196,7 +192,7 @@ router.use((req, res, next) => {
     });
 });
 
-router.use((req, res, next) => {
+router.use(authenticatedRoutes, (req, res, next) => {
   const { user } = res.locals.oauth.token;
   const account = new MyQ(user.securityToken);
   res.locals.account = account;
