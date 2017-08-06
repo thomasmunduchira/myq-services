@@ -55,19 +55,6 @@ router.get('/', (req, res) => {
   return res.redirect('/authorize');
 });
 
-router.get('/hahaha', (req, res) => {
-  return User.find({})
-    .then((users) => {
-      console.log(users.length);
-      for (let user of users) {
-        user.password = encrypt(user.password);
-        User.findOneAndUpdate({"_id": user._id}, user, {}, (err, response) =>  {
-          console.log(err, 'done');
-        });
-      };
-    });
-});
-
 router.get('/authorize', (req, res) => {
   const { response_type, client_id, redirect_uri, scope, state } = req.query;
   if (response_type && client_id && redirect_uri && scope && state) {
