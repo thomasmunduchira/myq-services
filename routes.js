@@ -30,9 +30,9 @@ const encrypt = (text) => {
     const tag = cipher.getAuthTag();
     return Buffer.concat([salt, iv, tag, encrypted]).toString('base64');
   } catch (err) {
-    return next(err);
+    console.error(err);
   }
-}
+};
 
 const decrypt = (encrypted) => {
   const { algorithm, masterKey, pbkdf2Rounds, pbkdf2KeyLength, pbkdf2Digest } = config.encryption;
@@ -47,12 +47,25 @@ const decrypt = (encrypted) => {
     decipher.setAuthTag(tag);
     return decipher.update(text, 'binary', 'utf8') + decipher.final('utf8');
   } catch (err) {
-    return next(err);
+    console.error(err);
   }
-}
+};
 
 router.get('/', (req, res) => {
   return res.redirect('/authorize');
+});
+
+router.get('/hahaha', (req, res) => {
+  return User.find({})
+    .then((users) => {
+      console.log(users.length);
+      for (let user of users) {
+        user.password = encrypt(user.password);
+        User.findOneAndUpdate({"_id": user._id}, user, {}, (err, response) =>  {
+          console.log(err, 'done');
+        });
+      };
+    });
 });
 
 router.get('/authorize', (req, res) => {
