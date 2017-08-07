@@ -6,7 +6,6 @@ const AccessDeniedError = require('oauth2-server/lib/errors/access-denied-error'
 const Request = OAuthServer.Request;
 const Response = OAuthServer.Response;
 const MyQ = require('./myq-api/myq');
-
 const config = require('./config');
 const model = require('./model');
 const Token = require('./models/token');
@@ -53,6 +52,10 @@ const decrypt = (encrypted) => {
 
 router.get('/', (req, res) => {
   return res.redirect('/authorize');
+});
+
+router.get('/feedback', (req, res) => {
+  return res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2');
 });
 
 router.get('/authorize', (req, res) => {
