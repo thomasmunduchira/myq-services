@@ -9,12 +9,15 @@
   <meta name="msapplication-TileColor" content="#FFFFFF" />
   <meta name="msapplication-TileImage" content="images/mstile-144x144.png" />
 
-  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.8/sweetalert2.min.css">
+  <link rel="stylesheet" type="text/css" href="css/dist/style.css">
   {{#each stylesheets}}
-    <link rel="stylesheet" type="text/css" href="css/{{this}}">
+    <link rel="stylesheet" type="text/css" href="css/dist/{{this}}">
   {{/each}}
 
   <script defer src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script defer type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.8/sweetalert2.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
   {{#each scripts}}
     <script defer type="text/javascript" src="js/{{this}}"></script>
   {{/each}}
