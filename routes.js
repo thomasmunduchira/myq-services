@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const OAuthServer = require('oauth2-server');
 const AccessDeniedError = require('oauth2-server/lib/errors/access-denied-error');
@@ -54,17 +55,7 @@ router.get('/', (req, res) => {
   return res.redirect('/authorize');
 });
 
-router.get('/feedback', (req, res) => {
-  return res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2');
-});
-
-router.get('/authorize', (req, res) => {
-  const { response_type, client_id, redirect_uri, scope, state } = req.query;
-  if (response_type && client_id && redirect_uri && scope && state) {
-    req.session.query = req.query;
-  } else {
-    delete req.session.query;
-  }
+router.get('/login', (req, res) => {
   return res.render('pages/login', { 
     title: 'Login | MyQ Home',
     stylesheets: ['login.css'],
@@ -78,6 +69,20 @@ router.get('/privacy-policy', (req, res) => {
     stylesheets: ['privacy-policy.css'],
     scripts: []
   });
+});
+
+router.get('/feedback', (req, res) => {
+  return res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2');
+});
+
+router.get('/authorize', (req, res) => {
+  const { response_type, client_id, redirect_uri, scope, state } = req.query;
+  if (response_type && client_id && redirect_uri && scope && state) {
+    req.session.query = req.query;
+  } else {
+    delete req.session.query;
+  }
+  return res.redirect('/login');
 });
 
 router.post('/login', (req, res, next) => {
@@ -115,14 +120,22 @@ router.post('/login', (req, res, next) => {
       }
       findResult.password = req.session.user.password;
       findResult.securityToken = req.session.user.securityToken;
+      delete findResult.pin;
       return findResult.save();
     }).then((saveResult) => {
       const query = req.session.query || {};
-      const { response_type, client_id, redirect_uri, scope, state } = query;
+      const { pin, response_type, client_id, redirect_uri, scope, state } = query;
       if (!response_type || !client_id || !redirect_uri || !scope || !state) {
         res.json({
           success: true,
           message: 'Logged in!'
+        });
+        throw new Error('requestFinalized');
+      } else if (pin === 'true') {
+        res.json({
+          success: true,
+          message: 'Logged in!',
+          pin: true
         });
         throw new Error('requestFinalized');
       }
@@ -132,6 +145,43 @@ router.post('/login', (req, res, next) => {
     }).catch((err) => {
       next(err);
     });
+});
+
+router.post('/pin', (req, res, next) => {
+  const { pin } = req.body;
+  const { username, password, securityToken } = req.session.user;
+  if (!username || !password || !securityToken) {
+    res.json({
+      success: false,
+      message: 'Error: not authenticated',
+    });
+    throw new Error('requestFinalized');
+  }
+
+  const data = {};
+  return User.findOne({
+    username: email
+  }).then((findResult) => {
+    if (!findResult) {
+      res.json({
+        success: false,
+        message: 'Error: user does not exist',
+      });
+      throw new Error('requestFinalized');
+    }
+    data.findResult = findResult;
+
+    return bcrypt.hash(pin, config.hashing.saltRounds);
+  }).then((hash) => {
+    data.findResult.pin = hash;
+    return data.findResult.save();
+  }).then((saveResult) => {
+    req.query = req.session.query;
+    req.url = '/oauth/authorize';
+    return next();
+  }).catch((err) => {
+    next(err);
+  });
 });
 
 const handleResponse = (req, res, response) => {
@@ -264,10 +314,23 @@ router.get('/door/state', (req, res) => {
 });
 
 router.put('/door/state', (req, res) => {
-  const { id, state } = req.body;
-  const { account } = res.locals;
-  return account.setDoorState(id, state)
-    .then((result) => {
+  const { id, state, pin } = req.body;
+  const { account, oauth } = res.locals;
+  const { user } = oauth.token;
+  
+  return bcrypt.compare(pin, user.pin)
+    .then((res) => {
+      if (!res) {
+        const result = {
+          returnCode: 20,
+          message: 'Error: pin incorrect'
+        };
+        console.log('PUT /door/state:', result);
+        res.json(result);
+        throw new Error('requestFinalized');
+      }
+      return account.setDoorState(id, state)
+    }).then((result) => {
       console.log('PUT /door/state:', result);
       return res.json(result);
     }).catch((err) => {

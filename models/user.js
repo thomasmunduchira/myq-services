@@ -10,6 +10,9 @@ const model = mongoose.model('User', new Schema({
   },
   securityToken: {
     type: String
+  },
+  pin: {
+    type: Number
   }
 }));
 

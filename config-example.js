@@ -12,6 +12,9 @@ const config = {
     pbkdf2KeyLength: 32,
     pbkdf2Digest: 'sha512'
   },
+  hashing: {
+    saltRounds: 10
+  },
   authenticatedRoutes: ['/devices', '/door/state', '/light/state']
 };
 
