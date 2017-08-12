@@ -12,7 +12,7 @@ const model = mongoose.model('User', new Schema({
     type: String
   },
   pin: {
-    type: Number
+    type: String
   }
 }));
 

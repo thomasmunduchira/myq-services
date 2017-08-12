@@ -4,7 +4,7 @@
   "description": "Website to interface with MyQ accounts and devices",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "npm run build && nodemon app.js",
     "build": "postcss public/css/src/*.css --use autoprefixer -d public/css/dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

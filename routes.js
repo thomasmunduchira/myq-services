@@ -51,11 +51,11 @@ const decrypt = (encrypted) => {
   }
 };
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   return res.redirect('/authorize');
 });
 
-router.get('/login', (req, res) => {
+router.get('/login', (req, res, next) => {
   return res.render('pages/login', { 
     title: 'Login | MyQ Home',
     stylesheets: ['login.css'],
@@ -63,7 +63,7 @@ router.get('/login', (req, res) => {
   });
 });
 
-router.get('/privacy-policy', (req, res) => {
+router.get('/privacy-policy', (req, res, next) => {
   return res.render('pages/privacy-policy', { 
     title: 'Privacy Policy | MyQ Home',
     stylesheets: ['privacy-policy.css'],
@@ -71,11 +71,11 @@ router.get('/privacy-policy', (req, res) => {
   });
 });
 
-router.get('/feedback', (req, res) => {
+router.get('/feedback', (req, res, next) => {
   return res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2');
 });
 
-router.get('/authorize', (req, res) => {
+router.get('/authorize', (req, res, next) => {
   const { response_type, client_id, redirect_uri, scope, state } = req.query;
   if (response_type && client_id && redirect_uri && scope && state) {
     req.session.query = req.query;
@@ -120,22 +120,14 @@ router.post('/login', (req, res, next) => {
       }
       findResult.password = req.session.user.password;
       findResult.securityToken = req.session.user.securityToken;
-      delete findResult.pin;
       return findResult.save();
     }).then((saveResult) => {
       const query = req.session.query || {};
       const { pin, response_type, client_id, redirect_uri, scope, state } = query;
-      if (!response_type || !client_id || !redirect_uri || !scope || !state) {
+      if (pin === 'true' || !response_type || !client_id || !redirect_uri || !scope || !state) {
         res.json({
           success: true,
           message: 'Logged in!'
-        });
-        throw new Error('requestFinalized');
-      } else if (pin === 'true') {
-        res.json({
-          success: true,
-          message: 'Logged in!',
-          pin: true
         });
         throw new Error('requestFinalized');
       }
@@ -148,8 +140,10 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/pin', (req, res, next) => {
-  const { pin } = req.body;
+  const { enablePin, pin } = req.body;
   const { username, password, securityToken } = req.session.user;
+  const query = req.session.query || {};
+  const { response_type, client_id, redirect_uri, scope, state } = query;
   if (!username || !password || !securityToken) {
     res.json({
       success: false,
@@ -160,7 +154,7 @@ router.post('/pin', (req, res, next) => {
 
   const data = {};
   return User.findOne({
-    username: email
+    username
   }).then((findResult) => {
     if (!findResult) {
       res.json({
@@ -171,11 +165,22 @@ router.post('/pin', (req, res, next) => {
     }
     data.findResult = findResult;
 
-    return bcrypt.hash(pin, config.hashing.saltRounds);
+    return enablePin ? bcrypt.hash(pin, config.hashing.saltRounds) : null;
   }).then((hash) => {
-    data.findResult.pin = hash;
+    if (enablePin) {
+      data.findResult.pin = hash;
+    } else {
+      data.findResult.pin = undefined;
+    }
     return data.findResult.save();
   }).then((saveResult) => {
+    if (!response_type || !client_id || !redirect_uri || !scope || !state) {
+      res.json({
+        success: true,
+        message: 'Pin saved!'
+      });
+      throw new Error('requestFinalized');
+    }
     req.query = req.session.query;
     req.url = '/oauth/authorize';
     return next();
@@ -274,7 +279,7 @@ router.use(config.authenticatedRoutes, (req, res, next) => {
 });
 
 router.use(config.authenticatedRoutes, (req, res, next) => {
-  const { user } = res.locals.oauth.token;
+  const { user } = res.locals.oauth.token; 
   const account = new MyQ(user.username, decrypt(user.password));
   return account.login()
     .then((result) => {
@@ -289,7 +294,7 @@ router.use(config.authenticatedRoutes, (req, res, next) => {
     });
 });
 
-router.get('/devices', (req, res) => {
+router.get('/devices', (req, res, next) => {
   const { account } = res.locals;
   const typeIds = [2, 3, 5, 7, 17]
   return account.getDevices(typeIds)
@@ -301,7 +306,7 @@ router.get('/devices', (req, res) => {
     });
 });
 
-router.get('/door/state', (req, res) => {
+router.get('/door/state', (req, res, next) => {
   const { id } = req.query;
   const { account } = res.locals;
   return account.getDoorState(id)
@@ -313,32 +318,55 @@ router.get('/door/state', (req, res) => {
     });
 });
 
-router.put('/door/state', (req, res) => {
-  const { id, state, pin } = req.body;
-  const { account, oauth } = res.locals;
-  const { user } = oauth.token;
-  
-  return bcrypt.compare(pin, user.pin)
-    .then((res) => {
-      if (!res) {
-        const result = {
-          returnCode: 20,
-          message: 'Error: pin incorrect'
-        };
-        console.log('PUT /door/state:', result);
-        res.json(result);
-        throw new Error('requestFinalized');
-      }
-      return account.setDoorState(id, state)
-    }).then((result) => {
+const setDoorState = (req, res, next) => {
+  return account.setDoorState(id, state)
+    .then((result) => {
       console.log('PUT /door/state:', result);
       return res.json(result);
     }).catch((err) => {
       return next(err);
     });
+}
+
+router.put('/door/state', (req, res, next) => {
+  const { id, state, pin } = req.body;
+  const { account, oauth } = res.locals;
+  const { user } = oauth.token;
+
+  if (state === 1) {
+    if (!user.pin) {
+      const result = {
+        returnCode: 20,
+        message: 'Error: no pin saved'
+      };
+      console.log('PUT /door/state:', result);
+      return res.json(result);
+    }
+
+    return bcrypt.compare(pin, user.pin)
+      .then((response) => {
+        if (!response) {
+          const result = {
+            returnCode: 21,
+            message: 'Error: pin incorrect'
+          };
+          console.log('PUT /door/state:', result);
+          res.json(result);
+          throw new Error('requestFinalized');
+        }
+        return setDoorState(req, res, next);
+      }).catch((err) => {
+        return next(err);
+      });
+  } else {
+    return setDoorState(req, res, next)
+      .catch((err) => {
+        return next(err);
+      });
+  }
 });
 
-router.get('/light/state', (req, res) => {
+router.get('/light/state', (req, res, next) => {
   const { id } = req.query;
   const { account } = res.locals;
   return account.setLightState(id)
@@ -350,7 +378,7 @@ router.get('/light/state', (req, res) => {
     });
 });
 
-router.put('/light/state', (req, res) => {
+router.put('/light/state', (req, res, next) => {
   const { id, state } = req.body;
   const { account } = res.locals;
   return account.setLightState(id, state)

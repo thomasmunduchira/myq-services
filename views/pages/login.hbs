@@ -1,21 +1,45 @@
-<form id="login-form">
+<form id="login-form" class="form-container">
   <h2>MyQ Account</h2>
 
   <div>
     Email
   </div>
   <div>
-    <input id="email" type="text" name="email">
+    <input id="email" class="text-input" type="text" name="email">
   </div>
 
   <div>
     Password
   </div> 
   <div>
-    <input id="password" type="password" name="password">
+    <input id="password" class="text-input" type="password" name="password">
   </div>
 
   <div>
-    <input id="submit" type="submit">
+    <input id="submit-login" class="submit" type="submit">
+  </div>
+</form>
+
+<form id="pin-form" class="form-container">
+  <h2>MyQ Account</h2>
+  
+  <div id="pin-description">
+    A pin is required in order to be able to open your garage doors.
+  </div>
+
+  <div>
+    <input id="enable-pin" type="checkbox" name="pin">
+    <label for="pin">Enable Pin</label>
+  </div>
+
+  <div>
+    Pin
+  </div> 
+  <div>
+    <input id="pin" class="number-input" type="number" pattern="[0-9]*" inputmode="numeric" disabled="true">
+  </div>
+
+  <div>
+    <input id="submit-pin" class="submit" type="submit">
   </div>
 </form>

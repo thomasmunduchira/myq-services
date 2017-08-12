@@ -8,12 +8,17 @@ div {
   padding-bottom: 10px;
 }
 
-input {
+.text-input {
   width: 300px;
   height: 28px;
 }
 
-#submit {
+.number-input {
+  width: 200px;
+  height: 24px;
+}
+
+.submit {
   background: #FAFAFA;
   border: none;
   outline: none;
@@ -22,12 +27,12 @@ input {
   font-size: 1em;
 }
 
-#submit:hover {
+.submit:hover {
   background: #E0E0E0;
   cursor: pointer;
 }
 
-#login-form {
+.form-container {
   background: #ECEFF1;
   color: #212121;
   width: 340px;
@@ -36,4 +41,16 @@ input {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+#pin-form {
+  display: none;
+}
+
+#pin-description {
+  margin-bottom: 15px;
+}
+
+#pin:disabled {
+  background: lightgray;
 }
