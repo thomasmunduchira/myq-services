@@ -337,7 +337,7 @@ router.put('/door/state', (req, res, next) => {
     if (!user.pin) {
       const result = {
         returnCode: 20,
-        message: 'Error: no pin saved'
+        error: 'Error: no pin saved'
       };
       console.log('PUT /door/state:', result);
       return res.json(result);
@@ -348,7 +348,7 @@ router.put('/door/state', (req, res, next) => {
         if (!response) {
           const result = {
             returnCode: 21,
-            message: 'Error: pin incorrect'
+            error: 'Error: pin incorrect'
           };
           console.log('PUT /door/state:', result);
           res.json(result);
