@@ -72,7 +72,7 @@ function pin() {
   var enablePin = $('#enable-pin').is(':checked');
   var pin = $('#pin').val();
   
-  if (enablePin && pin.length < 4 || pin.length > 12) {
+  if (enablePin && (pin.length < 4 || pin.length > 12)) {
     return swal({
       title: 'Error',
       text: 'Pin must be 4 to 12 digits in length',

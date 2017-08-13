@@ -150,7 +150,7 @@ router.post('/pin', (req, res, next) => {
       message: 'Error: not authenticated'
     });
     throw new Error('requestFinalized');
-  } else if (pin.length < 4 || pin.length > 12) {
+  } else if (enablePin && (pin.length < 4 || pin.length > 12)) {
     res.json({
       success: false,
       message: 'Error: pin must be 4 to 12 digits in length'
