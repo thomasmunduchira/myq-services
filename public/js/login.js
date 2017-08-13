@@ -2,27 +2,44 @@ function login() {
   var email = $('#email').val();
   var password = $('#password').val();
 
-  $.ajax({
-    url: '/login',
-    type: 'POST',
-    dataType: 'json',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      'email': email,
-      'password': password
-    })
-  }).done(function(response) {
+  swal({
+    title: 'Logging In',
+    showCancelButton: false,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: false,
+    preConfirm: function() {
+      return new Promise(function(resolve, reject) {
+        $.ajax({
+          url: '/login',
+          type: 'POST',
+          dataType: 'json',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            email: email,
+            password: password
+          })
+        }).done(function(response) {
+          resolve(response);
+        }).fail(function(err) {
+          console.error(err);
+        });
+      });
+    },
+    onOpen: function() {
+      swal.clickConfirm();
+    }
+  }).then(function(response) {
     if (response.redirectUri) {
       swal({
         title: 'Success!',
         text: 'You will be redirected back to Amazon',
-        type: 'success'
+        type: 'success',
+        timer: 3000
       }).then(function() {
-
+        window.location.href = response.redirectUri;
       }, function(dismiss) {
-
+        window.location.href = response.redirectUri;
       });
-      window.location.href = response.redirectUri;
     } else if (!response.success) {
       swal({
         title: 'Error',
@@ -37,9 +54,9 @@ function login() {
     } else {
       swal({
         title: 'Success!',
-        text: 'You were able to sign in to your MyQ account',
+        text: 'You were able to sign into your MyQ account',
         type: 'success',
-        timer: 2000
+        timer: 3000
       }).then(function() {
         $('#login-form').css('display', 'none');
         $('#pin-form').css('display', 'flex');
@@ -48,8 +65,6 @@ function login() {
         $('#pin-form').css('display', 'flex');
       });
     }
-  }).fail(function(err) {
-    console.error(err);
   });
 };
 
@@ -57,17 +72,58 @@ function pin() {
   var enablePin = $('#enable-pin').is(':checked');
   var pin = $('#pin').val();
   
-  $.ajax({
-    url: '/pin',
-    type: 'POST',
-    dataType: 'json',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      enablePin: enablePin,
-      pin: pin
-    })
-  }).done(function(response) {
-    if (!response.success) {
+  if (enablePin && pin.length < 4 || pin.length > 12) {
+    return swal({
+      title: 'Error',
+      text: 'Pin must be 4 to 12 digits in length',
+      type: 'error',
+      timer: 6000
+    }).then(function() {
+
+    }, function(dismiss) {
+
+    });
+  }
+
+  swal({
+    title: 'Saving Pin Information',
+    showCancelButton: false,
+    showLoaderOnConfirm: true,
+    allowOutsideClick: false,
+    preConfirm: function() {
+      return new Promise(function(resolve, reject) {
+        $.ajax({
+          url: '/pin',
+          type: 'POST',
+          dataType: 'json',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            enablePin: enablePin,
+            pin: pin
+          })
+        }).done(function(response) {
+          resolve(response);
+        }).fail(function(err) {
+          console.error(err);
+        });
+      });
+    },
+    onOpen: function() {
+      swal.clickConfirm();
+    }
+  }).then(function(response) {
+    if (response.redirectUri) {
+      swal({
+        title: 'Success!',
+        text: 'You will be redirected back to Amazon',
+        type: 'success',
+        timer: 3000
+      }).then(function() {
+        window.location.href = response.redirectUri;
+      }, function(dismiss) {
+        window.location.href = response.redirectUri;
+      });
+    } else if (!response.success) {
       swal({
         title: 'Error',
         text: response.message,
@@ -81,16 +137,15 @@ function pin() {
     } else {
       swal({
         title: 'Success!',
-        text: enablePin ? 'Your pin has been saved' : 'No pin saved',
+        text: 'You\'re all set!',
         type: 'success',
+        timer: 1111000
       }).then(function() {
-        
+
       }, function(dismiss) {
 
       });
     }
-  }).fail(function(err) {
-    console.error(err);
   });
 };
 

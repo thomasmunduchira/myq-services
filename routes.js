@@ -147,7 +147,13 @@ router.post('/pin', (req, res, next) => {
   if (!username || !password || !securityToken) {
     res.json({
       success: false,
-      message: 'Error: not authenticated',
+      message: 'Error: not authenticated'
+    });
+    throw new Error('requestFinalized');
+  } else if (pin.length < 4 || pin.length > 12) {
+    res.json({
+      success: false,
+      message: 'Error: pin must be 4 to 12 digits in length'
     });
     throw new Error('requestFinalized');
   }
@@ -159,7 +165,7 @@ router.post('/pin', (req, res, next) => {
     if (!findResult) {
       res.json({
         success: false,
-        message: 'Error: user does not exist',
+        message: 'Error: user does not exist'
       });
       throw new Error('requestFinalized');
     }
@@ -321,7 +327,7 @@ router.get('/door/state', (req, res, next) => {
 const setDoorState = (req, res, next) => {
   const { id, state } = req.body;
   const { account } = res.locals;
-  
+
   return account.setDoorState(id, state)
     .then((result) => {
       console.log('PUT /door/state:', result);

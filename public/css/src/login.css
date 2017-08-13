@@ -19,17 +19,20 @@ div {
 }
 
 .submit {
-  background: #FAFAFA;
-  border: none;
-  outline: none;
-  width: 70px;
-  height: 30px;
-  font-size: 1em;
-}
-
-.submit:hover {
-  background: #E0E0E0;
+  -webkit-tap-highlight-color: transparent;
+  background-color: rgb(48, 133, 214);
+  border-left-color: rgb(48, 133, 214);
+  border-right-color: rgb(48, 133, 214);
+  border: 0;
+  border-radius: 3px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  color: #fff;
   cursor: pointer;
+  font-size: 17px;
+  font-weight: 500;
+  margin: 15px 5px 0;
+  padding: 10px 32px;
 }
 
 .form-container {
@@ -41,6 +44,7 @@ div {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-radius: 5px;
 }
 
 #pin-form {
