@@ -319,6 +319,9 @@ router.get('/door/state', (req, res, next) => {
 });
 
 const setDoorState = (req, res, next) => {
+  const { id, state } = req.body;
+  const { account } = res.locals;
+  
   return account.setDoorState(id, state)
     .then((result) => {
       console.log('PUT /door/state:', result);
@@ -329,8 +332,8 @@ const setDoorState = (req, res, next) => {
 }
 
 router.put('/door/state', (req, res, next) => {
-  const { id, state, pin } = req.body;
-  const { account, oauth } = res.locals;
+  const { state, pin } = req.body;
+  const { oauth } = res.locals;
   const { user } = oauth.token;
 
   if (state === 1) {
