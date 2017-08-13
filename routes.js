@@ -85,14 +85,18 @@ router.get('/authorize', (req, res, next) => {
   return res.redirect('/login');
 });
 
+const validateEmail = (email) => {
+  const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
 router.post('/login', (req, res, next) => {
   let { email, password } = req.body;
-  if (!email || !password) {
-    res.json({
+  if (!email || !password || !validateEmail(email)) {
+    return res.json({
       success: false,
       message: 'Email and/or password are incorrect.'
     });
-    throw new Error('requestFinalized');
   }
   email = email.replace(/\s/g, '').toLowerCase();
   const account = new MyQ(email, password);
@@ -140,22 +144,40 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/pin', (req, res, next) => {
-  const { enablePin, pin } = req.body;
+  let { enablePin, pin } = req.body;
   const { username, password, securityToken } = req.session.user;
   const query = req.session.query || {};
   const { response_type, client_id, redirect_uri, scope, state } = query;
   if (!username || !password || !securityToken) {
-    res.json({
+    return res.json({
       success: false,
       message: 'Error: not authenticated'
     });
-    throw new Error('requestFinalized');
-  } else if (enablePin && (pin.length < 4 || pin.length > 12)) {
-    res.json({
-      success: false,
-      message: 'Error: pin must be 4 to 12 digits in length'
-    });
-    throw new Error('requestFinalized');
+  } else if (enablePin) {
+    if (!pin) {
+      return res.json({
+        success: false,
+        message: 'Error: no pin provided'
+      });
+    } else if (!Number.isInteger(pin)) {
+      return res.json({
+        success: false,
+        message: 'Error: pin must be an integer'
+      });
+    } else if (pin < 0) {
+      return res.json({
+        success: false,
+        message: 'Error: Pin must be positive'
+      });
+    }
+    
+    pin = pin.toString();
+    if (pin.length < 4 || pin.length > 12) {
+      return res.json({
+        success: false,
+        message: 'Error: Pin must be 4 to 12 digits in length'
+      });
+    }
   }
 
   const data = {};
@@ -171,7 +193,10 @@ router.post('/pin', (req, res, next) => {
     }
     data.findResult = findResult;
 
-    return enablePin ? bcrypt.hash(pin, config.hashing.saltRounds) : null;
+    if (!enablePin) {
+      return;
+    }
+    return bcrypt.hash(pin, config.hashing.saltRounds)
   }).then((hash) => {
     if (enablePin) {
       data.findResult.pin = hash;
@@ -338,7 +363,7 @@ const setDoorState = (req, res, next) => {
 }
 
 router.put('/door/state', (req, res, next) => {
-  const { state, pin } = req.body;
+  let { state, pin } = req.body;
   const { oauth } = res.locals;
   const { user } = oauth.token;
 
@@ -350,14 +375,30 @@ router.put('/door/state', (req, res, next) => {
       };
       console.log('PUT /door/state:', result);
       return res.json(result);
+    } else if (!pin) {
+      const result = {
+        returnCode: 21,
+        error: 'Error: no pin provided'
+      };
+      console.log('PUT /door/state:', result);
+      return res.json(result);
+    } else if (!Number.isInteger(pin) || pin < 0) {
+      const result = {
+        returnCode: 22,
+        error: 'Error: invalid pin'
+      };
+      console.log('PUT /door/state:', result);
+      return res.json(result);
     }
+    
+    pin = pin.toString();
 
     return bcrypt.compare(pin, user.pin)
       .then((response) => {
         if (!response) {
           const result = {
-            returnCode: 21,
-            error: 'Error: pin incorrect'
+            returnCode: 22,
+            error: 'Error: invalid pin'
           };
           console.log('PUT /door/state:', result);
           res.json(result);

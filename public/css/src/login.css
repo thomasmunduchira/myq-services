@@ -2,10 +2,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
 }
 
 div {
   padding-bottom: 10px;
+}
+
+input:focus {
+  outline: -webkit-focus-ring-color auto 5px;
 }
 
 .text-input {
@@ -33,6 +38,14 @@ div {
   font-weight: 500;
   margin: 15px 5px 0;
   padding: 10px 32px;
+}
+
+.submit:active {
+  background-color: #236bb0;
+}
+
+.submit:hover {
+  background-color: #297dce;
 }
 
 .form-container {

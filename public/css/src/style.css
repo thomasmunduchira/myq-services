@@ -16,7 +16,6 @@ input:focus {
 
 input[type=text],
 input[type=password],
-input[type=checkbox],
 input[type=number],
 input[type=submit] {
   appearance: none;

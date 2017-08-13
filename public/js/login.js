@@ -1,6 +1,53 @@
+function validateEmail(email) {
+  var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
+function showSuccess(message, callback) {
+  return swal({
+    title: 'Success!',
+    text: message,
+    type: 'success',
+    timer: 3000
+  }).then(function() {
+    if (callback) {
+      callback();
+    }
+  }, function(dismiss) {
+    if (callback) {
+      callback();
+    }
+  });
+}
+
+function showError(message, callback) {
+  return swal({
+    title: 'Error',
+    text: message,
+    type: 'error',
+    timer: 6000
+  }).then(function() {
+    if (callback) {
+      callback();
+    }
+  }, function(dismiss) {
+    if (callback) {
+      callback();
+    }
+  });
+}
+
 function login() {
   var email = $('#email').val();
   var password = $('#password').val();
+
+  if (!email) {
+    return showError('No email entered');
+  } else if (!password) {
+    return showError('No password entered');
+  } if (!validateEmail(email)) {
+    return showError('Invalid email entered');
+  }
 
   swal({
     title: 'Logging In',
@@ -30,37 +77,13 @@ function login() {
     }
   }).then(function(response) {
     if (response.redirectUri) {
-      swal({
-        title: 'Success!',
-        text: 'You will be redirected back to Amazon',
-        type: 'success',
-        timer: 3000
-      }).then(function() {
-        window.location.href = response.redirectUri;
-      }, function(dismiss) {
+      showSuccess('You will be redirected back to Amazon', function() {
         window.location.href = response.redirectUri;
       });
     } else if (!response.success) {
-      swal({
-        title: 'Error',
-        text: response.message,
-        type: 'error',
-        timer: 6000
-      }).then(function() {
-
-      }, function(dismiss) {
-
-      });
+      showError(response.message);
     } else {
-      swal({
-        title: 'Success!',
-        text: 'You were able to sign into your MyQ account',
-        type: 'success',
-        timer: 3000
-      }).then(function() {
-        $('#login-form').css('display', 'none');
-        $('#pin-form').css('display', 'flex');
-      }, function(dismiss) {
+      showSuccess('You were able to sign into your MyQ account', function() {
         $('#login-form').css('display', 'none');
         $('#pin-form').css('display', 'flex');
       });
@@ -70,19 +93,22 @@ function login() {
 
 function pin() {
   var enablePin = $('#enable-pin').is(':checked');
-  var pin = $('#pin').val();
-  
-  if (enablePin && (pin.length < 4 || pin.length > 12)) {
-    return swal({
-      title: 'Error',
-      text: 'Pin must be 4 to 12 digits in length',
-      type: 'error',
-      timer: 6000
-    }).then(function() {
+  var pinString = $('#pin').val();
+  var pin;
 
-    }, function(dismiss) {
+  if (enablePin) {
+    if (pinString.indexOf('.') !== -1) {
+      return showError('Pin must be an integer');
+    } else if (pinString.length < 4 || pinString.length > 12) {
+      return showError('Pin must be 4 to 12 digits in length');
+    }
 
-    });
+    pin = +pinString;
+    if (!pin) {
+      return showError('Pin must be numeric');
+    } else if (pin < 0) {
+      return showError('Pin must be positive');
+    }
   }
 
   swal({
@@ -113,38 +139,13 @@ function pin() {
     }
   }).then(function(response) {
     if (response.redirectUri) {
-      swal({
-        title: 'Success!',
-        text: 'You will be redirected back to Amazon',
-        type: 'success',
-        timer: 3000
-      }).then(function() {
-        window.location.href = response.redirectUri;
-      }, function(dismiss) {
+      showSuccess('You will be redirected back to Amazon', function() {
         window.location.href = response.redirectUri;
       });
     } else if (!response.success) {
-      swal({
-        title: 'Error',
-        text: response.message,
-        type: 'error',
-        timer: 6000
-      }).then(function() {
-
-      }, function(dismiss) {
-
-      });
+      showError(response.message);
     } else {
-      swal({
-        title: 'Success!',
-        text: 'You\'re all set!',
-        type: 'success',
-        timer: 1111000
-      }).then(function() {
-
-      }, function(dismiss) {
-
-      });
+      showSuccess('You\'re all set!');
     }
   });
 };
