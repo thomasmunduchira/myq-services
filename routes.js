@@ -200,6 +200,7 @@ router.post('/pin', (req, res, next) => {
   }).then((hash) => {
     if (enablePin) {
       data.findResult.pin = hash;
+      data.findResult.pinReset = false;
     } else {
       data.findResult.pin = undefined;
     }
@@ -309,6 +310,32 @@ router.use(config.authenticatedRoutes, (req, res, next) => {
     });
 });
 
+router.get('/resetPin', (req, res, next) => {
+  const { user } = res.locals.oauth.token;
+  const { username } = user;
+
+  return User.findOne({
+    username
+  }).then((findResult) => {
+    if (!findResult) {
+      res.json({
+        success: false,
+        message: 'Error: user does not exist'
+      });
+      throw new Error('requestFinalized');
+    }
+    findResult.pin = undefined;
+    findResult.pinReset = true;
+    return findResult.save();
+  }).then((saveResult) => {
+    return res.json({
+      success: true
+    });
+  }).catch((err) => {
+    next(err);
+  });
+});
+
 router.use(config.authenticatedRoutes, (req, res, next) => {
   const { user } = res.locals.oauth.token; 
   const account = new MyQ(user.username, decrypt(user.password));
@@ -368,7 +395,14 @@ router.put('/door/state', (req, res, next) => {
   const { user } = oauth.token;
 
   if (state === 1) {
-    if (!user.pin) {
+    if (user.resetPin) {
+      const result = {
+        returnCode: 23,
+        error: 'Error: pin reset'
+      };
+      console.log('PUT /door/state:', result);
+      return res.json(result);
+    } else if (!user.pin) {
       const result = {
         returnCode: 20,
         error: 'Error: no pin saved'
