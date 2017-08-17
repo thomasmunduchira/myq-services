@@ -15,7 +15,7 @@ const config = {
   hashing: {
     saltRounds: 10
   },
-  authenticatedRoutes: ['/devices', '/door/state', '/light/state']
+  authenticatedRoutes: ['/resetPin', '/devices', '/door/state', '/light/state']
 };
 
 module.exports = config;

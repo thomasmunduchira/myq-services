@@ -13,6 +13,9 @@ const model = mongoose.model('User', new Schema({
   },
   pin: {
     type: String
+  },
+  pinReset: {
+    type: Boolean
   }
 }));
 

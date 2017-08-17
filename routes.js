@@ -310,7 +310,7 @@ router.use(config.authenticatedRoutes, (req, res, next) => {
     });
 });
 
-router.get('/resetPin', (req, res, next) => {
+router.post('/resetPin', (req, res, next) => {
   const { user } = res.locals.oauth.token;
   const { username } = user;
 
@@ -328,6 +328,7 @@ router.get('/resetPin', (req, res, next) => {
     findResult.pinReset = true;
     return findResult.save();
   }).then((saveResult) => {
+    console.log("SAVE ", saveResult);
     return res.json({
       success: true
     });
@@ -393,9 +394,9 @@ router.put('/door/state', (req, res, next) => {
   let { state, pin } = req.body;
   const { oauth } = res.locals;
   const { user } = oauth.token;
-
+  
   if (state === 1) {
-    if (user.resetPin) {
+    if (user.pinReset) {
       const result = {
         returnCode: 23,
         error: 'Error: pin reset'
