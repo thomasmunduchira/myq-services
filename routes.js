@@ -15,7 +15,7 @@ const User = require('./models/user');
 
 const router = express.Router();
 
-const oauth = new OAuthServer({ 
+const oauth = new OAuthServer({
   model
 });
 
@@ -51,28 +51,12 @@ const decrypt = (encrypted) => {
   }
 };
 
-router.get('/', (req, res, next) => {
-  return res.redirect('/authorize');
-});
-
-router.get('/login', (req, res, next) => {
-  return res.render('pages/login', { 
-    title: 'Login | MyQ Home',
-    stylesheets: ['login.css'],
-    scripts: ['login.js']
-  });
-});
-
-router.get('/privacy-policy', (req, res, next) => {
-  return res.render('pages/privacy-policy', { 
-    title: 'Privacy Policy | MyQ Home',
-    stylesheets: ['privacy-policy.css'],
-    scripts: []
-  });
-});
-
 router.get('/feedback', (req, res, next) => {
   return res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2');
+});
+
+router.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 router.get('/authorize', (req, res, next) => {
@@ -170,7 +154,7 @@ router.post('/pin', (req, res, next) => {
         message: 'Error: Pin must be positive'
       });
     }
-    
+
     pin = pin.toString();
     if (pin.length < 4 || pin.length > 12) {
       return res.json({
@@ -338,7 +322,7 @@ router.post('/resetPin', (req, res, next) => {
 });
 
 router.use(config.authenticatedRoutes, (req, res, next) => {
-  const { user } = res.locals.oauth.token; 
+  const { user } = res.locals.oauth.token;
   const account = new MyQ(user.username, decrypt(user.password));
   return account.login()
     .then((result) => {
@@ -394,7 +378,7 @@ router.put('/door/state', (req, res, next) => {
   let { state, pin } = req.body;
   const { oauth } = res.locals;
   const { user } = oauth.token;
-  
+
   if (state === 1) {
     if (user.pinReset) {
       const result = {
@@ -425,7 +409,7 @@ router.put('/door/state', (req, res, next) => {
       console.log('PUT /door/state:', result);
       return res.json(result);
     }
-    
+
     pin = pin.toString();
 
     return bcrypt.compare(pin, user.pin)

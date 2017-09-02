@@ -60,7 +60,7 @@ input:focus {
   border-radius: 5px;
 }
 
-#pin-form {
+.hidden {
   display: none;
 }
 

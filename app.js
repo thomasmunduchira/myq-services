@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-const hbs = require('hbs');
 
 const config = require('./config');
 const routes = require('./routes');
@@ -22,17 +21,13 @@ db.once('open', () => {
   console.log('Connected to database!');
 });
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-hbs.registerPartials(path.join(__dirname, 'views/partials'));
-
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 const sess = {
   store: new MongoStore({
@@ -69,7 +64,7 @@ app.use((err, req, res, next) => {
 
   res.status(err.status || 500);
   if (err.status === 404) {
-    return res.render('error', { 
+    return res.render('error', {
       title: '404 | MyQ Home',
       stylesheets: ['error.css'],
       scripts: []
@@ -81,6 +76,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('MyQ site listening on port 3000!');
+app.listen(8080, () => {
+  console.log('MyQ site listening on port 8080!');
 });
