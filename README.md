@@ -1,2 +1,2 @@
-# myq-site
-Website to interface with MyQ accounts and devices
+# myq-auth
+Authorization server for MyQ services

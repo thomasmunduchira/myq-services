@@ -1,8 +1,8 @@
 {
-  "name": "myq-site",
+  "name": "myq-auth",
   "version": "1.0.0",
   "private": true,
-  "description": "Website to interface with MyQ accounts and devices",
+  "description": "Authorization server for MyQ services",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
@@ -30,6 +30,5 @@
     "morgan": "^1.8.2",
     "oauth2-server": "next"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

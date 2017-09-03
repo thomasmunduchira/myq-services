@@ -1,5 +1,5 @@
 {
-  "name": "myq-site-client",
+  "name": "myq-auth-client",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:8080/",
@@ -37,6 +37,8 @@
     "react-dev-utils": "^4.0.0",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.2.2",
+    "redux-devtools": "^3.4.0",
+    "redux-thunk": "^2.2.0",
     "style-loader": "0.18.2",
     "sw-precache-webpack-plugin": "0.11.4",
     "sweetalert2": "^6.6.9",
