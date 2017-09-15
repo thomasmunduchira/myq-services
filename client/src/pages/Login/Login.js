@@ -213,42 +213,15 @@ class Login extends Component {
   render = (event) => {
     return (
       <div>
-        <form id="login-form" className={'form-container' + (this.state.form === 'login' ? '' : ' hidden')} onKeyPress={this.loginKeyPress}>
-          <h2>MyQ Account</h2>
+        <form id="login-form" className="form-container">
+          <h2>Notice</h2>
           <div>
-            Email
-          </div>
-          <div>
-            <input id="email" className="text-input" type="text" name="email" value={this.state.email} onChange={this.emailChange} />
-          </div>
-          <div>
-            Password
-          </div>
-          <div>
-            <input id="password" className="text-input" type="password" name="password" value={this.state.password} onChange={this.passwordChange} />
-          </div>
-          <div>
-            <input id="submit-login" className="submit" type="submit" onClick={this.submitLogin}/>
-          </div>
-        </form>
-
-        <form id="pin-form" className={'form-container' + (this.state.form === 'pin' ? '' : ' hidden')} onKeyPress={this.pinKeyPress}>
-          <h2>MyQ Account</h2>
-          <div id="pin-description">
-            A pin is required in order to be able to open your garage doors.
-          </div>
-          <div>
-            <input id="enable-pin" type="checkbox" name="pin" value={this.state.enablePin} onChange={this.toggleEnablePin} />
-            <label htmlFor="pin">Enable Pin</label>
-          </div>
-          <div>
-            Pin (must be 4-12 digits in length)
-          </div>
-          <div>
-            <input id="pin" className="number-input" type="number" pattern="[0-9]*" inputMode="numeric" disabled={this.state.checked} value={this.state.pin} onChange={this.pinChange} />
-          </div>
-          <div>
-            <input id="submit-pin" className="submit" type="submit" onClick={this.submitPin} />
+            <p>
+              The Alexa skills that used this service have not been approved through Chamberlain’s partnership process, and have been disabled as a result. The developer is working with the appropriate teams to secure the proper approval and agreement.
+            </p>
+            <p>
+              Check the community forums for more details.
+            </p>
           </div>
         </form>
       </div>

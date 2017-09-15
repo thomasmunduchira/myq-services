@@ -52,7 +52,7 @@ input:focus {
   background: #ECEFF1;
   color: #212121;
   width: 340px;
-  height: 400px;
+  height: 500px;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -70,4 +70,9 @@ input:focus {
 
 #pin:disabled {
   background: lightgray;
+}
+
+p {
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
