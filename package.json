@@ -1,34 +1,47 @@
 {
-  "name": "myq-auth",
+  "name": "myq-services",
   "version": "1.0.0",
   "private": true,
-  "description": "Authorization server for MyQ services",
+  "description": "Authorization/resource server for MyQ services",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
+    "lint": "eslint ./",
+    "fix": "eslint --fix ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thomasmunduchira/liftmaster-api.git"
+    "url": "git+https://github.com/thomasmunduchira/myq-services.git"
   },
   "author": "Thomas Munduchira",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/thomasmunduchira/liftmaster-api/issues"
+    "url": "https://github.com/thomasmunduchira/myq-services/issues"
   },
-  "homepage": "https://github.com/thomasmunduchira/liftmaster-api#readme",
+  "homepage": "https://github.com/thomasmunduchira/myq-services#readme",
   "dependencies": {
-    "bcrypt": "^1.0.2",
-    "body-parser": "^1.17.2",
-    "connect-mongo": "^1.3.2",
-    "crypto": "^0.0.3",
-    "express": "^4.15.3",
-    "express-session": "^1.15.4",
-    "logger": "^0.0.1",
-    "mongoose": "^4.11.3",
-    "morgan": "^1.8.2",
+    "bcrypt": "1.0.2",
+    "body-parser": "1.17.2",
+    "connect-mongo": "1.3.2",
+    "express": "4.15.3",
+    "express-session": "1.15.4",
+    "logger": "0.0.1",
+    "mongoose": "4.11.3",
+    "morgan": "1.8.2",
     "oauth2-server": "next"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "babel-eslint": "8.0.0",
+    "eslint": "4.5.0",
+    "eslint-config-airbnb-base": "11.3.1",
+    "eslint-config-prettier": "2.4.0",
+    "eslint-config-react-app": "2.0.0",
+    "eslint-plugin-flowtype": "2.35.1",
+    "eslint-plugin-import": "2.7.0",
+    "eslint-plugin-jsx-a11y": "6.0.2",
+    "eslint-plugin-prettier": "2.2.0",
+    "eslint-plugin-react": "7.3.0",
+    "prettier": "1.6.1"
+  }
 }

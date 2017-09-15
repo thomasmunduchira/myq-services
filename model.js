@@ -3,53 +3,56 @@ const Token = require('./models/token');
 const Client = require('./models/client');
 const User = require('./models/user');
 
-module.exports.getAccessToken = (accessToken) => {
+module.exports.getAccessToken = accessToken => {
   console.log('getAccessToken', accessToken);
   return Token.findOne({
-      accessToken
-    }).populate('client')
+    accessToken,
+  })
+    .populate('client')
     .populate('user')
     .lean()
-    .catch((err) => {
+    .catch(err => {
       console.log('getAccessToken - Error: ', err);
     });
-}
+};
 
-module.exports.getRefreshToken = (refreshToken) => {
+module.exports.getRefreshToken = refreshToken => {
   console.log('getRefreshToken', refreshToken);
   return Token.findOne({
-      refreshToken
-    }).populate('client')
+    refreshToken,
+  })
+    .populate('client')
     .populate('user')
     .lean()
-    .catch((err) => {
+    .catch(err => {
       console.log('getRefreshToken - Error: ', err);
     });
-}
+};
 
-module.exports.getAuthorizationCode = (code) => {
+module.exports.getAuthorizationCode = code => {
   console.log('getAuthorizationCode', code);
   return AuthorizationCode.findOne({
-      code
-    }).populate('client')
+    code,
+  })
+    .populate('client')
     .populate('user')
     .lean()
-    .catch((err) => {
+    .catch(err => {
       console.log('getAuthorizationCode - Error: ', err);
     });
-}
+};
 
 module.exports.getClient = (id, secret) => {
   console.log('getClient', id, secret);
   const query = {
-    id
+    id,
   };
   if (secret) {
     query.secret = secret;
   }
   return Client.findOne(query)
     .lean()
-    .catch((err) => {
+    .catch(err => {
       console.log('getClient - Error: ', err);
     });
 };
@@ -57,10 +60,11 @@ module.exports.getClient = (id, secret) => {
 module.exports.getUser = (username, password) => {
   console.log('getUser', username, password);
   return User.findOne({
-      username,
-      password
-    }).lean()
-    .catch((err) => {
+    username,
+    password,
+  })
+    .lean()
+    .catch(err => {
       console.log('getUser - Error: ', err);
     });
 };
@@ -73,25 +77,27 @@ module.exports.saveToken = (token, client, user) => {
     refreshToken: token.refreshToken,
     refreshTokenExpiresAt: token.refreshTokenExpiresAt,
     client: client._id,
-    user: user._id
+    user: user._id,
   });
-  return newToken.save()
-    .then((saveResult) => {
+  return newToken
+    .save()
+    .then(saveResult => {
       console.log(saveResult);
-      var data = {};
-      for (let prop in token) {
+      const data = {};
+      for (const prop in token) {
         data[prop] = token[prop];
       }
       data.client = {};
-      for (let prop in client) {
+      for (const prop in client) {
         data.client[prop] = client[prop];
       }
       data.user = {};
-      for (let prop in user) {
+      for (const prop in user) {
         data.user[prop] = user[prop];
       }
       return data;
-    }).catch((err) => {
+    })
+    .catch(err => {
       console.log('saveToken - Error: ', err);
     });
 };
@@ -104,44 +110,46 @@ module.exports.saveAuthorizationCode = (code, client, user) => {
     client: client._id,
     user: user._id,
   });
-  return newAuthorizationCode.save()
-    .then((saveResult) => {
-      var data = {};
-      for (let prop in code) {
+  return newAuthorizationCode
+    .save()
+    .then(saveResult => {
+      const data = {};
+      for (const prop in code) {
         data[prop] = code[prop];
       }
       data.client = {};
-      for (let prop in client) {
+      for (const prop in client) {
         data.client[prop] = client[prop];
       }
       data.user = {};
-      for (let prop in user) {
+      for (const prop in user) {
         data.user[prop] = user[prop];
       }
       return data;
-    }).catch((err) => {
+    })
+    .catch(err => {
       console.log('saveAuthorizationCode - Error: ', err);
     });
 };
 
-module.exports.revokeToken = (token) => {
+module.exports.revokeToken = token => {
   console.log('revokeToken', token);
   return Token.findOneAndRemove({
-      refreshToken: token.refreshToken
-    }).then((removeResult) => {
-      return !!removeResult;
-    }).catch((err) => {
+    refreshToken: token.refreshToken,
+  })
+    .then(removeResult => !!removeResult)
+    .catch(err => {
       console.log('revokeToken - Error: ', err);
     });
-}
+};
 
-module.exports.revokeAuthorizationCode = (code) => {
+module.exports.revokeAuthorizationCode = code => {
   console.log('revokeAuthorizationCode', code);
   return AuthorizationCode.findOneAndRemove({
-      code: code.code
-    }).then((removeResult) => {
-      return !!removeResult;
-    }).catch((err) => {
+    code: code.code,
+  })
+    .then(removeResult => !!removeResult)
+    .catch(err => {
       console.log('revokeAuthorizationCode - Error: ', err);
     });
-}
+};

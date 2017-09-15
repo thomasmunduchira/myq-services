@@ -2,9 +2,7 @@ import './PrivacyPolicy.css';
 import React, { Component } from 'react';
 
 class PrivacyPolicy extends Component {
-  state = {};
-
-  render = (event) => {
+  render(event) {
     return (
       <div>
         <div id="privacy-header">
