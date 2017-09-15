@@ -1,22 +1,34 @@
+import 'normalize.css';
 import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Main from './pages/Main/Main';
-import Developer from './pages/Developer/Developer';
-import Login from './pages/Login/Login';
-import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import registerServiceWorker from './registerServiceWorker';
+import Loadable from 'react-loadable';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import LoadingComponent from './components/LoadingComponent';
+// import registerServiceWorker from './registerServiceWorker';
+
+const makeAsyncComponent = (importString) => {
+  return Loadable({
+    loader: () => import(`${importString}`),
+    loading: LoadingComponent,
+    delay: 0,
+    timeout: 5000,
+  });
+};
+
+const AsyncLogin = makeAsyncComponent('./pages/Login/Login');
+const AsyncPrivacyPolicy = makeAsyncComponent('./pages/PrivacyPolicy/PrivacyPolicy');
+const AsyncNotFound = makeAsyncComponent('./pages/NotFound/NotFound');
 
 ReactDOM.render(
   <Router>
     <div>
-      {/* <Route exact path="/" component={Main} /> */}
-      <Route path="/developer" component={Developer} />
-      <Route path="/login" component={Login} />
-      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Switch>
+        <Route path="/login" exact component={AsyncLogin} />
+        <Route path="/privacy-policy" exact component={AsyncPrivacyPolicy} />
+        <Route component={AsyncNotFound} />
+      </Switch>
     </div>
   </Router>,
   document.getElementById('root')
 );
-registerServiceWorker();

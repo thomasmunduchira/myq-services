@@ -23,15 +23,17 @@ db.once('open', () => {
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+app.use(
+  bodyParser.urlencoded({
+    extended: false,
+  })
+);
 
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 const sess = {
   store: new MongoStore({
-    mongooseConnection: db
+    mongooseConnection: db,
   }),
   secret: config.session.secret,
   resave: false,
@@ -67,12 +69,12 @@ app.use((err, req, res, next) => {
     return res.render('error', {
       title: '404 | MyQ Home',
       stylesheets: ['error.css'],
-      scripts: []
+      scripts: [],
     });
   }
   return res.json({
     success: false,
-    message: 'Something unexpected happened. Please wait a bit and try again.'
+    message: 'Something unexpected happened. Please wait a bit and try again.',
   });
 });
 
