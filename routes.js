@@ -52,22 +52,6 @@ const decrypt = encrypted => {
   }
 };
 
-router.get('/feedback', (req, res, next) => res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2'));
-
-router.get('/authorize', (req, res, next) => {
-  const { response_type, client_id, redirect_uri, scope, state } = req.query;
-  if (response_type && client_id && redirect_uri && scope && state) {
-    req.session.query = req.query;
-  } else {
-    delete req.session.query;
-  }
-  return res.redirect('/login');
-});
-
-router.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
-});
-
 const validateEmail = email => {
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
@@ -473,6 +457,22 @@ router.use(config.authenticatedRoutes, (req, res) => {
 
   result.email = user.username;
   return res.json(result);
+});
+
+router.get('/feedback', (req, res, next) => res.redirect('https://goo.gl/forms/0QqC5ez2uMaqn5LT2'));
+
+router.get('/authorize', (req, res, next) => {
+  const { response_type, client_id, redirect_uri, scope, state } = req.query;
+  if (response_type && client_id && redirect_uri && scope && state) {
+    req.session.query = req.query;
+  } else {
+    delete req.session.query;
+  }
+  return res.redirect('/login');
+});
+
+router.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 module.exports = router;
