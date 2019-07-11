@@ -29,7 +29,7 @@
     "logger": "0.0.1",
     "mongoose": "4.11.3",
     "morgan": "1.8.2",
-    "oauth2-server": "next"
+    "oauth2-server": "3.0.1"
   },
   "devDependencies": {
     "babel-eslint": "8.0.0",
