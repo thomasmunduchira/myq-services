@@ -27,7 +27,7 @@
     "express": "4.16.0",
     "express-session": "1.15.4",
     "logger": "0.0.1",
-    "mongoose": "4.11.3",
+    "mongoose": "5.7.5",
     "morgan": "1.8.2",
     "oauth2-server": "next"
   },
